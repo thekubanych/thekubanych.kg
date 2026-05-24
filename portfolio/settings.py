@@ -9,7 +9,7 @@ DEBUG = config("DEBUG", default=True, cast=bool)
 
 
 
-ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+ALLOWED_HOSTS = ["127.0.0.1", "localhost", "0.0.0.0"]
 CSRF_TRUSTED_ORIGINS = []
 
 railway_host = config("RAILWAY_PUBLIC_DOMAIN", default="")
@@ -109,6 +109,38 @@ CONTACT_EMAIL = config("CONTACT_EMAIL", default="")
 
 TELEGRAM_BOT_TOKEN = config("TELEGRAM_BOT_TOKEN", default="")
 TELEGRAM_CHAT_ID = config("TELEGRAM_CHAT_ID", default="")
+
+# Sentry (error monitoring) — init only when DSN provided
+SENTRY_DSN = config("SENTRY_DSN", default="")
+if SENTRY_DSN:
+    try:
+        import sentry_sdk
+        from sentry_sdk.integrations.django import DjangoIntegration
+
+        sentry_sdk.init(
+            dsn=SENTRY_DSN,
+            integrations=[DjangoIntegration()],
+            traces_sample_rate=0.0,
+            send_default_pii=False,
+        )
+    except Exception:
+        pass
+
+# Production security defaults (applied when DEBUG is False)
+if not DEBUG:
+    # Ensure hosts can be configured from environment as comma-separated list
+    env_hosts = config("ALLOWED_HOSTS", default="")
+    if env_hosts:
+        ALLOWED_HOSTS = [h.strip() for h in env_hosts.split(",") if h.strip()]
+
+    # Security recommendations for production
+    SECURE_HSTS_SECONDS = config("SECURE_HSTS_SECONDS", default=3600, cast=int)
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = config("SECURE_HSTS_INCLUDE_SUBDOMAINS", default=False, cast=bool)
+    SECURE_SSL_REDIRECT = config("SECURE_SSL_REDIRECT", default=True, cast=bool)
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
 
 # Кеш для rate limiting (форма контакта)
 CACHES = {

@@ -1,0 +1,30 @@
+{% load static %}
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Проекты — TheKubanych</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  </head>
+  <body>
+    <main style="padding:40px;max-width:980px;margin:0 auto;font-family:sans-serif;">
+      <h1>Проекты</h1>
+      <p>Список активных проектов.</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-top:20px;">
+        {% if projects %}
+          {% for p in projects %}
+            <article style="border:1px solid #ddd;padding:18px;border-radius:10px;">
+              <h3 style="margin:0 0 6px;">{{ p.title }}</h3>
+              <p style="margin:0 0 8px;color:#444;">{{ p.short_description }}</p>
+              <a href="/api/projects/{{ p.id }}/">Подробнее</a>
+            </article>
+          {% endfor %}
+        {% else %}
+          <div>Пока нет проектов.</div>
+        {% endif %}
+      </div>
+      <p style="margin-top:24px;"><a href="/">← Назад на главную</a></p>
+    </main>
+  </body>
+</html>

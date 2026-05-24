@@ -732,7 +732,10 @@ nav { top: 40px; transition: top 0.3s; }
 @media(max-width:900px){
   section{padding:100px 24px 60px;}
   #hero{grid-template-columns:1fr;}
-  .hero-right{display:none;}
+  /* Показываем фото на мобильных: уменьшаем размер и центрируем */
+  .hero-right{display:flex;justify-content:center;align-items:center;margin-top:20px;}
+  .photo-container{width:220px;height:260px;}
+  .photo-main{border-radius:16px;}
   nav{padding:0 20px;}
   .nav-menu{display:none !important;}
   .hamburger{display:flex;}

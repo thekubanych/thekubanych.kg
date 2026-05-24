@@ -48,6 +48,17 @@ python manage.py runserver
 Открой: http://localhost:8000
 Админка: http://localhost:8000/admin
 
+## Docker (быстрый старт)
+
+Собрать и запустить контейнер:
+
+```bash
+docker build -t portfolio:latest .
+docker run -p 8000:8000 --env-file .env portfolio:latest
+```
+
+Контейнер использует `gunicorn` и делает `collectstatic` при сборке.
+
 ## Деплой на Railway (бесплатно)
 
 1. Загрузи на GitHub:

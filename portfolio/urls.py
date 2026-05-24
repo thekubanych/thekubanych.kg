@@ -32,10 +32,21 @@ def sitemap_xml(request):
     return HttpResponse(content, content_type="application/xml")
 
 
+def projects_view(request):
+    """Простая страница с проектами, рендерится на сервере."""
+    from api.serializers import ProjectSerializer
+    from api.models import Project
+
+    projects = Project.objects.filter(is_active=True).order_by('-updated_at')
+    projects_data = ProjectSerializer(projects, many=True, context={'request': request}).data
+    return render(request, 'projects.html', {'projects': projects_data})
+
+
 urlpatterns = [
     path('', home_view, name='home'),
     path('robots.txt', robots_txt),
     path('sitemap.xml', sitemap_xml),
+    path('projects/', projects_view, name='projects'),
     path('admin/', admin.site.urls),
     path('api/', include('api.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
