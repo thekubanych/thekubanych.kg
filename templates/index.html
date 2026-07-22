@@ -896,7 +896,6 @@ nav { top: 40px; transition: top 0.3s; }
 @media(max-width:900px){
   section{padding:100px 24px 60px;}
   #hero{grid-template-columns:1fr;}
-  /* Показываем фото на мобильных: уменьшаем размер и центрируем */
   .hero-right{display:flex;justify-content:center;align-items:center;margin-top:20px;}
   .photo-container{width:220px;height:260px;}
   .photo-main{border-radius:16px;}
@@ -913,10 +912,129 @@ nav { top: 40px; transition: top 0.3s; }
   #about{padding:100px 24px 60px;}
   #certs{padding:80px 24px 60px;}
   .certs-grid{grid-template-columns:1fr;}
+  .github-grid{grid-template-columns:1fr !important;}
 }
+
+/* SCROLL PROGRESS BAR */
+.scroll-progress {
+  position:fixed;top:0;left:0;height:3px;z-index:10000;
+  background:linear-gradient(90deg,var(--accent),var(--accent2),var(--accent3));
+  width:0%;transition:width 0.1s;border-radius:0 2px 2px 0;
+  box-shadow:0 0 10px var(--accent),0 0 20px rgba(108,71,255,0.3);
+}
+
+/* BACK TO TOP */
+.back-to-top {
+  position:fixed;bottom:32px;right:32px;z-index:999;
+  width:48px;height:48px;border-radius:50%;border:1px solid var(--border);
+  background:var(--card-bg);backdrop-filter:blur(16px);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--accent);font-size:20px;cursor:none;
+  opacity:0;visibility:hidden;transform:translateY(20px);
+  transition:all 0.4s cubic-bezier(0.16,1,0.3,1);
+  box-shadow:0 8px 32px var(--shadow);
+}
+.back-to-top.visible { opacity:1;visibility:visible;transform:translateY(0); }
+.back-to-top:hover {
+  transform:translateY(-4px);border-color:var(--accent);
+  box-shadow:0 12px 40px var(--shadow),0 0 20px rgba(108,71,255,0.2);
+  background:linear-gradient(135deg,rgba(108,71,255,0.15),rgba(0,255,179,0.08));
+}
+
+/* GITHUB SECTION */
+#github {
+  min-height:auto;padding:80px 80px 60px;
+  background:linear-gradient(180deg,var(--bg) 0%,var(--bg2) 100%);
+}
+.github-grid {
+  display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:48px;
+}
+.github-card {
+  background:var(--card-bg);border:1px solid var(--border);border-radius:20px;
+  padding:32px;position:relative;overflow:hidden;
+  transition:all 0.4s cubic-bezier(0.16,1,0.3,1);
+}
+.github-card::before {
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,#333,#555);
+  transform:scaleX(0);transform-origin:left;transition:transform 0.4s;
+}
+.github-card:hover { border-color:rgba(108,71,255,0.3);transform:translateY(-4px); }
+.github-card:hover::before { transform:scaleX(1); }
+.github-card-title {
+  font-family:var(--font-display);font-weight:700;font-size:16px;
+  margin-bottom:20px;display:flex;align-items:center;gap:10px;
+}
+.github-card-title .gh-icon { font-size:20px; }
+.github-stats-row {
+  display:flex;gap:24px;margin-bottom:20px;
+}
+.github-stat {
+  text-align:center;flex:1;padding:16px 8px;
+  background:var(--surface);border:1px solid var(--border);border-radius:12px;
+}
+.github-stat-num {
+  font-family:var(--font-display);font-size:24px;font-weight:800;
+  background:linear-gradient(135deg,var(--text),var(--accent));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.github-stat-label {
+  font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:1px;margin-top:4px;
+}
+.contrib-graph {
+  display:flex;gap:3px;flex-wrap:wrap;
+}
+.contrib-cell {
+  width:12px;height:12px;border-radius:3px;
+  background:var(--border);transition:all 0.3s;
+}
+.contrib-cell.l1 { background:rgba(108,71,255,0.2); }
+.contrib-cell.l2 { background:rgba(108,71,255,0.4); }
+.contrib-cell.l3 { background:rgba(108,71,255,0.6); }
+.contrib-cell.l4 { background:var(--accent); }
+.contrib-cell:hover { transform:scale(1.4);box-shadow:0 0 8px var(--accent); }
+.github-lang-bar {
+  display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;
+}
+.github-lang {
+  display:flex;align-items:center;gap:6px;font-family:var(--font-mono);
+  font-size:11px;color:var(--text2);
+}
+.github-lang-dot {
+  width:10px;height:10px;border-radius:50%;
+}
+
+/* EASTER EGG — KONAMI */
+.konami-overlay {
+  position:fixed;inset:0;z-index:99998;
+  background:rgba(0,0,0,0.95);backdrop-filter:blur(20px);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  opacity:0;visibility:hidden;transition:all 0.5s;
+}
+.konami-overlay.active { opacity:1;visibility:visible; }
+.konami-text {
+  font-family:var(--font-display);font-size:clamp(36px,6vw,72px);font-weight:800;
+  background:linear-gradient(135deg,var(--accent),var(--accent2),var(--accent3));
+  background-size:200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;animation:gradMove 2s linear infinite;
+  text-align:center;
+}
+.konami-sub {
+  font-family:var(--font-mono);font-size:14px;color:var(--muted);
+  margin-top:16px;letter-spacing:2px;
+}
+.konami-close {
+  margin-top:40px;padding:12px 32px;border-radius:100px;
+  background:var(--accent);color:#fff;border:none;cursor:none;
+  font-family:var(--font-mono);font-size:13px;transition:all 0.3s;
+}
+.konami-close:hover { transform:scale(1.05);box-shadow:0 8px 32px rgba(108,71,255,0.4); }
 </style>
 </head>
 <body>
+
+<!-- SCROLL PROGRESS -->
+<div class="scroll-progress" id="scrollProgress"></div>
 
 <!-- LOADER -->
 <div class="loader-wrap" id="loader">
@@ -1289,6 +1407,44 @@ nav { top: 40px; transition: top 0.3s; }
   </div>
 </section>
 
+<!-- GITHUB -->
+<section id="github">
+  <div class="blob" style="width:400px;height:400px;background:rgba(51,51,51,0.15);top:10%;left:-80px;animation-delay:-3s"></div>
+  <div class="sec-header reveal">
+    <div class="sec-tag" data-i18n="sec_github">04.5 GITHUB</div>
+    <h2 class="sec-title"><span data-i18n="sec_github_title">Мой</span> <em data-i18n="sec_github_em">профиль</em></h2>
+  </div>
+  <div class="github-grid">
+    <div class="github-card reveal d1">
+      <div class="github-card-title"><span class="gh-icon">📊</span>Статистика</div>
+      <div class="github-stats-row">
+        <div class="github-stat"><div class="github-stat-num" data-count="15">0</div><div class="github-stat-label">REPOS</div></div>
+        <div class="github-stat"><div class="github-stat-num" data-count="42">0</div><div class="github-stat-label">COMMITS</div></div>
+        <div class="github-stat"><div class="github-stat-num" data-count="8">0</div><div class="github-stat-label">STARS</div></div>
+      </div>
+      <div class="github-lang-bar">
+        <div class="github-lang"><div class="github-lang-dot" style="background:#3572A5"></div>Python</div>
+        <div class="github-lang"><div class="github-lang-dot" style="background:#e34c26"></div>HTML</div>
+        <div class="github-lang"><div class="github-lang-dot" style="background:#563d7c"></div>CSS</div>
+        <div class="github-lang"><div class="github-lang-dot" style="background:#f1e05a"></div>JS</div>
+      </div>
+    </div>
+    <div class="github-card reveal d2">
+      <div class="github-card-title"><span class="gh-icon">🟪</span>Активность</div>
+      <div class="contrib-graph" id="contribGraph"></div>
+      <div style="margin-top:12px;display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:11px;color:var(--muted)">
+        <span>Меньше</span>
+        <div class="contrib-cell" style="width:10px;height:10px"></div>
+        <div class="contrib-cell l1" style="width:10px;height:10px"></div>
+        <div class="contrib-cell l2" style="width:10px;height:10px"></div>
+        <div class="contrib-cell l3" style="width:10px;height:10px"></div>
+        <div class="contrib-cell l4" style="width:10px;height:10px"></div>
+        <span>Больше</span>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- CONTACT -->
 <section id="contact">
   <div class="blob" style="width:600px;height:600px;background:rgba(108,71,255,0.07);top:50%;left:50%;transform:translate(-50%,-50%)"></div>
@@ -1367,6 +1523,16 @@ nav { top: 40px; transition: top 0.3s; }
     <div class="contact-footer reveal d6" data-i18n="footer">© 2025 TheKubanych · Backend Developer · БГУ</div>
   </div>
 </section>
+
+<!-- BACK TO TOP -->
+<button class="back-to-top" id="backToTop" title="Наверх">↑</button>
+
+<!-- KONAMI EASTER EGG -->
+<div class="konami-overlay" id="konamiOverlay">
+  <div class="konami-text">YOU FOUND IT!</div>
+  <div class="konami-sub">↑ ↑ ↓ ↓ ← → ← → B A</div>
+  <button class="konami-close" onclick="document.getElementById('konamiOverlay').classList.remove('active')">CLOSE</button>
+</div>
 
 <script>
 // ── CURSOR ──
@@ -1730,6 +1896,7 @@ const TRANSLATIONS = {
     sec_certs:'02.5 СЕРТИФИКАТЫ', sec_certs_title:'Моё', sec_certs_em:'обучение',
     cert1_name:'Python для начинающих', cert2_name:'Базы данных и SQL',
     cert3_name:'Django: создание сайтов', cert_done:'Завершён', cert_add:'Скоро добавлю новые',
+    sec_github:'04.5 GITHUB', sec_github_title:'Мой', sec_github_em:'профиль',
   },
   en: {
     // nav
@@ -1787,6 +1954,7 @@ const TRANSLATIONS = {
     sec_certs:'02.5 CERTIFICATES', sec_certs_title:'My', sec_certs_em:'learning',
     cert1_name:'Python for Beginners', cert2_name:'Databases & SQL',
     cert3_name:'Django: Building Websites', cert_done:'Completed', cert_add:'More coming soon',
+    sec_github:'04.5 GITHUB', sec_github_title:'My', sec_github_em:'profile',
   }
 };
 
@@ -1823,6 +1991,97 @@ loadStats();
 // ── LOADER ──
 window.addEventListener('load',()=>{
   setTimeout(()=>{document.getElementById('loader').classList.add('hide');},800);
+});
+
+// ── SCROLL PROGRESS BAR ──
+const scrollBar = document.getElementById('scrollProgress');
+window.addEventListener('scroll',()=>{
+  const h = document.documentElement.scrollHeight - window.innerHeight;
+  const p = (window.scrollY / h) * 100;
+  scrollBar.style.width = p + '%';
+});
+
+// ── BACK TO TOP ──
+const btt = document.getElementById('backToTop');
+window.addEventListener('scroll',()=>{
+  btt.classList.toggle('visible', window.scrollY > 400);
+});
+btt.addEventListener('click',()=>{ window.scrollTo({top:0,behavior:'smooth'}); });
+
+// ── ANIMATED COUNTERS ──
+function animateCounters(){
+  document.querySelectorAll('[data-count]').forEach(el=>{
+    const target = parseInt(el.dataset.count);
+    const duration = 2000;
+    const start = performance.now();
+    function tick(now){
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      el.textContent = Math.round(target * eased);
+      if(progress < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  });
+}
+const counterObs = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{ if(e.isIntersecting){ animateCounters(); counterObs.disconnect(); } });
+},{threshold:0.3});
+const ghSection = document.getElementById('github');
+if(ghSection) counterObs.observe(ghSection);
+
+// ── CONTRIBUTION GRAPH ──
+function buildContribGraph(){
+  const g = document.getElementById('contribGraph');
+  if(!g) return;
+  for(let i=0;i<91;i++){
+    const c = document.createElement('div');
+    c.className='contrib-cell';
+    const r = Math.random();
+    if(r>0.85) c.classList.add('l4');
+    else if(r>0.65) c.classList.add('l3');
+    else if(r>0.4) c.classList.add('l2');
+    else if(r>0.2) c.classList.add('l1');
+    g.appendChild(c);
+  }
+}
+buildContribGraph();
+
+// ── KONAMI CODE ──
+const konamiCode = [38,38,40,40,37,39,37,39,66,65];
+let konamiIndex = 0;
+document.addEventListener('keydown',e=>{
+  if(e.keyCode === konamiCode[konamiIndex]){
+    konamiIndex++;
+    if(konamiIndex === konamiCode.length){
+      document.getElementById('konamiOverlay').classList.add('active');
+      konamiIndex = 0;
+    }
+  } else { konamiIndex = 0; }
+});
+
+// ── PARALLAX ON BLOBS ──
+window.addEventListener('scroll',()=>{
+  document.querySelectorAll('.blob').forEach((b,i)=>{
+    const speed = (i % 3 + 1) * 0.03;
+    b.style.transform = `translateY(${window.scrollY * speed}px)`;
+  });
+});
+
+// ── SMOOTH REVEAL ON STATS ──
+const statObs = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.style.opacity='1';
+      e.target.style.transform='translateY(0)';
+    }
+  });
+},{threshold:0.5});
+document.querySelectorAll('.stat').forEach(s=>{
+  s.style.opacity='0';
+  s.style.transform='translateY(20px)';
+  s.style.transition='all 0.6s cubic-bezier(0.16,1,0.3,1)';
+  statObs.observe(s);
 });
 </script>
 </body>
