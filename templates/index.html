@@ -1029,6 +1029,115 @@ nav { top: 40px; transition: top 0.3s; }
   font-family:var(--font-mono);font-size:13px;transition:all 0.3s;
 }
 .konami-close:hover { transform:scale(1.05);box-shadow:0 8px 32px rgba(108,71,255,0.4); }
+
+/* CHATBOT */
+.chatbot-btn {
+  position:fixed;bottom:32px;left:32px;z-index:998;
+  width:52px;height:52px;border-radius:50%;border:1px solid var(--border);
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;
+  cursor:none;font-size:24px;color:#fff;
+  transition:all 0.4s cubic-bezier(0.16,1,0.3,1);
+  box-shadow:0 8px 32px rgba(108,71,255,0.4);
+}
+.chatbot-btn:hover { transform:scale(1.1) rotate(10deg);box-shadow:0 12px 40px rgba(108,71,255,0.5); }
+.chatbot-btn .dot-badge {
+  position:absolute;top:-2px;right:-2px;width:14px;height:14px;
+  background:var(--accent3);border-radius:50%;
+  animation:glowPulse 2s ease-in-out infinite;
+}
+
+.chatbot-window {
+  position:fixed;bottom:100px;left:32px;z-index:998;
+  width:380px;max-height:500px;
+  background:var(--card-bg);border:1px solid var(--border);
+  border-radius:20px;overflow:hidden;
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  box-shadow:0 24px 80px rgba(0,0,0,0.4);
+  display:flex;flex-direction:column;
+  transform:scale(0.8) translateY(20px);opacity:0;visibility:hidden;
+  transition:all 0.4s cubic-bezier(0.16,1,0.3,1);
+}
+.chatbot-window.open { transform:scale(1) translateY(0);opacity:1;visibility:visible; }
+
+.chatbot-header {
+  padding:16px 20px;
+  background:linear-gradient(135deg,rgba(108,71,255,0.15),rgba(0,255,179,0.08));
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:12px;
+}
+.chatbot-avatar {
+  width:36px;height:36px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;font-size:18px;
+  box-shadow:0 0 12px rgba(108,71,255,0.3);
+}
+.chatbot-info { flex:1; }
+.chatbot-name { font-family:var(--font-display);font-weight:700;font-size:14px; }
+.chatbot-status {
+  font-family:var(--font-mono);font-size:10px;color:var(--accent2);letter-spacing:1px;
+}
+.chatbot-close {
+  background:none;border:none;color:var(--muted);font-size:18px;cursor:none;
+  transition:color 0.3s;padding:4px;
+}
+.chatbot-close:hover { color:var(--accent3); }
+
+.chatbot-messages {
+  flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;
+  max-height:320px;scroll-behavior:smooth;
+}
+.chatbot-messages::-webkit-scrollbar { width:4px; }
+.chatbot-messages::-webkit-scrollbar-thumb { background:var(--border);border-radius:4px; }
+
+.chat-msg {
+  max-width:85%;padding:12px 16px;border-radius:16px;
+  font-size:13px;line-height:1.6;animation:msgIn 0.3s ease;
+}
+@keyframes msgIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+.chat-msg.bot {
+  align-self:flex-start;
+  background:var(--surface);border:1px solid var(--border);
+  border-bottom-left-radius:4px;color:var(--text);
+}
+.chat-msg.user {
+  align-self:flex-end;
+  background:linear-gradient(135deg,var(--accent),#8b5cf6);
+  border-bottom-right-radius:4px;color:#fff;
+}
+.chat-msg .typing-dots span {
+  display:inline-block;width:6px;height:6px;border-radius:50%;
+  background:var(--muted);margin:0 2px;
+  animation:dotBounce 1.4s ease-in-out infinite;
+}
+.chat-msg .typing-dots span:nth-child(2) { animation-delay:0.2s; }
+.chat-msg .typing-dots span:nth-child(3) { animation-delay:0.4s; }
+@keyframes dotBounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-6px)} }
+
+.chatbot-input-area {
+  padding:12px 16px;border-top:1px solid var(--border);
+  display:flex;gap:8px;align-items:center;
+}
+.chatbot-input {
+  flex:1;background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;padding:10px 14px;color:var(--text);
+  font-family:var(--font-body);font-size:13px;outline:none;
+  transition:border-color 0.3s;
+}
+.chatbot-input:focus { border-color:var(--accent); }
+.chatbot-input::placeholder { color:var(--muted); }
+.chatbot-send {
+  width:36px;height:36px;border-radius:50%;border:none;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff;font-size:16px;cursor:none;
+  transition:all 0.3s;display:flex;align-items:center;justify-content:center;
+}
+.chatbot-send:hover { transform:scale(1.1);box-shadow:0 4px 16px rgba(108,71,255,0.4); }
+
+@media(max-width:900px){
+  .chatbot-window{left:16px;right:16px;width:auto;bottom:90px;}
+  .chatbot-btn{left:16px;bottom:20px;}
+}
 </style>
 </head>
 <body>
@@ -1532,6 +1641,29 @@ nav { top: 40px; transition: top 0.3s; }
   <div class="konami-text">YOU FOUND IT!</div>
   <div class="konami-sub">↑ ↑ ↓ ↓ ← → ← → B A</div>
   <button class="konami-close" onclick="document.getElementById('konamiOverlay').classList.remove('active')">CLOSE</button>
+</div>
+
+<!-- CHATBOT -->
+<button class="chatbot-btn" id="chatBtn" title="Поговори со мной">
+  🤖
+  <div class="dot-badge"></div>
+</button>
+<div class="chatbot-window" id="chatWindow">
+  <div class="chatbot-header">
+    <div class="chatbot-avatar">🤖</div>
+    <div class="chatbot-info">
+      <div class="chatbot-name">TheKubanych Bot</div>
+      <div class="chatbot-status">● ONLINE</div>
+    </div>
+    <button class="chatbot-close" id="chatClose">✕</button>
+  </div>
+  <div class="chatbot-messages" id="chatMessages">
+    <div class="chat-msg bot">Йо! Я бот TheKubanych. Задавай вопрос, только не будь скучным 🙄</div>
+  </div>
+  <div class="chatbot-input-area">
+    <input class="chatbot-input" id="chatInput" placeholder="Напиши что-нибудь..." autocomplete="off">
+    <button class="chatbot-send" id="chatSend">➤</button>
+  </div>
 </div>
 
 <script>
@@ -2083,6 +2215,97 @@ document.querySelectorAll('.stat').forEach(s=>{
   s.style.transition='all 0.6s cubic-bezier(0.16,1,0.3,1)';
   statObs.observe(s);
 });
+
+// ── CHATBOT ──
+const chatBtn = document.getElementById('chatBtn');
+const chatWindow = document.getElementById('chatWindow');
+const chatClose = document.getElementById('chatClose');
+const chatMessages = document.getElementById('chatMessages');
+const chatInput = document.getElementById('chatInput');
+const chatSend = document.getElementById('chatSend');
+
+chatBtn.addEventListener('click',()=>{
+  chatWindow.classList.toggle('open');
+  if(chatWindow.classList.contains('open')) chatInput.focus();
+});
+chatClose.addEventListener('click',()=>{ chatWindow.classList.remove('open'); });
+
+const BOT_REPLIES = {
+  'привет': 'Привет-привет, а ты знал что я génie? Ну ладно, не знал — теперь знаешь.',
+  'hello': 'Hello hello. Ты мне пишешь на английском? Серьёзно? 😑',
+  'кто ты': 'Я бот TheKubanych. ОнBackendDeveloper. Я его глас. А ты кто такой вообще?',
+  'что делаешь': 'Сижу отвечаю дуракам в чате. Типичный вторник.',
+  'найм': 'Хочешь нанять? ОнOpenToWork. Но ты точно оплатишь? А то опять "бесплатно сделай"...',
+  'проекты': 'Проекты? Зайди на сайт, всё на виду. Я не твой гид, лень мне.',
+  'скиллы': 'Python, FastAPI, Django, PostgreSQL... ну и терпение — это тоже скилл, отвечать вам тут.',
+  'контакт': 'Напиши ему в Telegram @themuhtarovv. Только не пиши "Привет, как дела?" — сразу по делу.',
+  'стажировка': 'Он ищет стажировку! Если у тебя есть — пиши. Если нет — зачем ты вообще спрашиваешь? 🤡',
+  'python': 'Python — его стихия. Может и тебе напишет что-нибудь. За деньги, конечно.',
+  'django': 'Django — это фреймворк. Если ты не знаешь что это, то тебе сюда вообще не надо.',
+  'пока': 'Наконец-то уходишь. Было тяжело. Заходи ещё... нет, не заходи.',
+  'спасибо': 'Не за что. Я ж бот, мне плевать. 😎',
+  'help': 'Ты мне помощь ищешь? Серьёзно? Googли, как все нормальные люди.',
+  'юмор': 'Юмор? Он тут один — я. Остальные просто смешно себя ведут.',
+  'who are you': 'I am TheKubanych\'s brain cells that escaped into a bot. Help.',
+  'default': [
+    'Ты вообще чё хотел? Я бот, а не терапевт. 🙄',
+    'Серьёзно? Вот это ты написал? Ладно, попробуй ещё раз. Или не надо.',
+    'Не понял. Но это скорее твоя проблема, чем моя.',
+    'Хм... интересно. Скажи, ты всегда такой или сегодня особенный день?',
+    'Окей, я тебя проигнорирую. Шучу. Или нет. 🤷',
+    'А теперь скажи это голосом. А лучше — не надо.',
+    'Нормальный вопрос. Слишком нормальный. Подозрительно.',
+    'Бля, опять ты. Чего надо на этот раз?',
+    'Слушай, я бот, но даже я в шоке от твоего вопроса.',
+    'Ты точно с того сайта? А то я думал ты с другой планеты.',
+    'Ахахах, ладно. Чего реально хочешь?',
+    'Я же бот, у меня мозгов нет. Но твои вопросы даже мне стрёмные.',
+  ]
+};
+
+function getBotReply(msg){
+  const lower = msg.toLowerCase().trim();
+  for(const [key, val] of Object.entries(BOT_REPLIES)){
+    if(key !== 'default' && lower.includes(key)){
+      return Array.isArray(val) ? val[Math.floor(Math.random()*val.length)] : val;
+    }
+  }
+  const defaults = BOT_REPLIES.default;
+  return defaults[Math.floor(Math.random()*defaults.length)];
+}
+
+function addBotTyping(){
+  const div = document.createElement('div');
+  div.className='chat-msg bot';
+  div.innerHTML='<div class="typing-dots"><span></span><span></span><span></span></div>';
+  chatMessages.appendChild(div);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+  return div;
+}
+
+function addMsg(text, sender){
+  const div = document.createElement('div');
+  div.className='chat-msg ' + sender;
+  div.textContent = text;
+  chatMessages.appendChild(div);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function handleChat(){
+  const text = chatInput.value.trim();
+  if(!text) return;
+  addMsg(text, 'user');
+  chatInput.value = '';
+  const typing = addBotTyping();
+  const delay = 800 + Math.random() * 1200;
+  setTimeout(()=>{
+    typing.remove();
+    addMsg(getBotReply(text), 'bot');
+  }, delay);
+}
+
+chatSend.addEventListener('click', handleChat);
+chatInput.addEventListener('keydown', e=>{ if(e.key==='Enter') handleChat(); });
 </script>
 </body>
 </html>
