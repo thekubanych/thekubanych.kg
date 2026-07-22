@@ -13,5 +13,6 @@ RUN pip install --no-cache-dir -r /app/requirements.txt
 COPY . /app
 
 RUN python manage.py collectstatic --noinput || true
+RUN python manage.py migrate --noinput
 
 CMD ["gunicorn", "portfolio.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "2"]
