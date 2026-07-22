@@ -12,7 +12,7 @@ class ProjectSerializer(serializers.ModelSerializer):
     status_display = serializers.CharField(source='get_status_display', read_only=True)
     class Meta:
         model = Project
-        fields = ['id', 'title', 'description', 'stack', 'status', 'status_display',
+        fields = ['id', 'title', 'short_description', 'description', 'stack', 'status', 'status_display',
                   'github_url', 'demo_url', 'is_featured', 'order', 'created_at']
 
 
