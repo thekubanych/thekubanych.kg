@@ -166,7 +166,6 @@ def cv_download(request):
     cv = ResumeFile.objects.filter(is_active=True).order_by('-updated_at').first()
     if not cv or not cv.file:
         return Response({'url': None}, status=status.HTTP_404_NOT_FOUND)
-    from django.conf import settings
     url = request.build_absolute_uri(cv.file.url)
     return Response({'url': url})
 

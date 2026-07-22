@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Skill, Project, ContactMessage, PageView, WorkExperience, ResumeFile
+from .models import Skill, Project, ContactMessage, PageView, WorkExperience, ResumeFile, TelegramUser
 
 
 @admin.register(Skill)
@@ -57,7 +57,6 @@ class PageViewAdmin(admin.ModelAdmin):
         return False
 
 
-from .models import TelegramUser
 
 @admin.register(TelegramUser)
 class TelegramUserAdmin(admin.ModelAdmin):
