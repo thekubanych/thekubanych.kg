@@ -2211,20 +2211,6 @@ const BOT_REPLIES = {}; // removed — using real AI API
 function getBotReply(msg, isEvil){
   return 'Using API...'; // fallback only
 }
-    }
-    const defaults = EVIL.default;
-    return defaults[Math.floor(Math.random()*defaults.length)];
-  }
-
-  // Normal mode
-  for(const [key, val] of Object.entries(BOT_REPLIES)){
-    if(key !== 'default' && lower.includes(key)){
-      return Array.isArray(val) ? val[Math.floor(Math.random()*val.length)] : val;
-    }
-  }
-  const defaults = BOT_REPLIES.default;
-  return defaults[Math.floor(Math.random()*defaults.length)];
-}
 
 function addBotTyping(){
   const div = document.createElement('div');
