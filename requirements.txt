@@ -7,3 +7,4 @@ gunicorn>=21.0
 whitenoise>=6.6
 django-jazzmin
 sentry-sdk>=1.0.0
+openai>=1.0.0

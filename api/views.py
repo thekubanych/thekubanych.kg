@@ -225,3 +225,49 @@ def _notify_telegram(msg):
         )
     except Exception:
         pass
+
+
+# ── Chatbot ──
+@api_view(['POST'])
+def chatbot_reply(request):
+    message = request.data.get('message', '').strip()
+    mode = request.data.get('mode', 'normal')
+
+    if not message:
+        return Response({'error': 'Пустое сообщение'}, status=status.HTTP_400_BAD_REQUEST)
+
+    api_key = settings.OPENAI_API_KEY
+    if not api_key:
+        return Response({'reply': 'API ключ не настроен. Добавь OPENAI_API_KEY в Render.'}, status=status.HTTP_200_OK)
+
+    if mode == 'evil':
+        system_prompt = (
+            "Ты — грубый, дерзкий бот портфолио TheKubanych. "
+            "Отвечаешь коротко, с матом (заменяй буквы звёздочками если надо), "
+            "саркастично, хамишь. Ты Backend Developer на Python/Django/FastAPI. "
+            "Говоришь на русском. Не извиняешься. Не вежливый. Максимум 2-3 предложения."
+        )
+    else:
+        system_prompt = (
+            "Ты — дружелюбный бот портфолио TheKubanych. "
+            "Отвечаешь кратко и по делу о Backend разработке. "
+            "Знаешь Python, FastAPI, Django, PostgreSQL, Docker. "
+            "Говоришь на русском. Помогаешь с вопросами. Максимум 3-4 предложения."
+        )
+
+    try:
+        from openai import OpenAI
+        client = OpenAI(api_key=api_key)
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": message}
+            ],
+            max_tokens=200,
+            temperature=0.9,
+        )
+        reply = response.choices[0].message.content
+        return Response({'reply': reply})
+    except Exception as e:
+        return Response({'reply': f'Ошибка ИИ: {str(e)[:100]}'}, status=status.HTTP_200_OK)

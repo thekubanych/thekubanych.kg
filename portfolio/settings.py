@@ -110,6 +110,8 @@ CONTACT_EMAIL = config("CONTACT_EMAIL", default="")
 TELEGRAM_BOT_TOKEN = config("TELEGRAM_BOT_TOKEN", default="")
 TELEGRAM_CHAT_ID = config("TELEGRAM_CHAT_ID", default="")
 
+OPENAI_API_KEY = config("OPENAI_API_KEY", default="")
+
 # Sentry (error monitoring) — init only when DSN provided
 SENTRY_DSN = config("SENTRY_DSN", default="")
 if SENTRY_DSN:
