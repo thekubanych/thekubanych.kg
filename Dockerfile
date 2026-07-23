@@ -14,5 +14,6 @@ COPY . /app
 
 RUN python manage.py collectstatic --noinput || true
 RUN python manage.py migrate --noinput
+RUN python manage.py seed_data
 
 CMD ["gunicorn", "portfolio.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "2"]

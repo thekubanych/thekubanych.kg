@@ -2121,9 +2121,13 @@ setupCvButtons();
 loadStats();
 
 // ── LOADER ──
-function hideLoader(){ document.getElementById('loader').classList.add('hide'); }
-window.addEventListener('load',()=>{ setTimeout(hideLoader,600); });
-setTimeout(hideLoader,3000); // fallback — максимум 3 сек
+function hideLoader(){
+  const l=document.getElementById('loader');
+  if(l)l.style.display='none';
+}
+hideLoader();
+setTimeout(hideLoader,1500);
+window.addEventListener('load',()=>{ setTimeout(hideLoader,300); });
 
 // ── SCROLL PROGRESS BAR ──
 const scrollBar = document.getElementById('scrollProgress');
