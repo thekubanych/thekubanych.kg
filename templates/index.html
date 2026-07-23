@@ -56,23 +56,6 @@ body {
   transition: background 0.4s, color 0.4s;
 }
 
-/* LOADER */
-.loader-wrap {
-  position:fixed;inset:0;z-index:99999;background:var(--bg);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;
-}
-.loader-wrap.hide { display:none !important; }
-.loader-ring {
-  width:48px;height:48px;border-radius:50%;
-  border:3px solid var(--border);border-top-color:var(--accent);border-right-color:var(--accent2);
-  animation:spin 1s linear infinite;
-}
-@keyframes spin { to{transform:rotate(360deg)} }
-.loader-text {
-  font-family:var(--font-mono);font-size:12px;color:var(--muted);letter-spacing:3px;
-  animation:pulse 1.5s ease-in-out infinite;
-}
-@keyframes pulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
 
 /* CURSOR */
 .cursor {
@@ -1144,11 +1127,7 @@ nav { top: 40px; transition: top 0.3s; }
 <!-- SCROLL PROGRESS -->
 <div class="scroll-progress" id="scrollProgress"></div>
 
-<!-- LOADER -->
-<div class="loader-wrap" id="loader">
-  <div class="loader-ring"></div>
-  <div class="loader-text">LOADING</div>
-</div>
+<!-- page ready -->
 
 <!-- GLOW ORBS -->
 <div class="glow-orb orb1"></div>
@@ -2119,15 +2098,7 @@ loadExperience();
 setupCvButtons();
 loadStats();
 
-// ── LOADER ──
-function hideLoader(){
-  const l=document.getElementById('loader');
-  if(l){l.classList.add('hide');l.style.display='none';}
-}
-hideLoader();
-setTimeout(hideLoader,500);
-setTimeout(hideLoader,1500);
-window.addEventListener('load',()=>{ setTimeout(hideLoader,200); });
+
 
 // ── SCROLL PROGRESS BAR ──
 const scrollBar = document.getElementById('scrollProgress');
