@@ -60,9 +60,8 @@ body {
 .loader-wrap {
   position:fixed;inset:0;z-index:99999;background:var(--bg);
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;
-  transition:opacity 0.6s,visibility 0.6s;
 }
-.loader-wrap.hide { opacity:0;visibility:hidden;pointer-events:none; }
+.loader-wrap.hide { display:none !important; }
 .loader-ring {
   width:48px;height:48px;border-radius:50%;
   border:3px solid var(--border);border-top-color:var(--accent);border-right-color:var(--accent2);
@@ -2123,11 +2122,12 @@ loadStats();
 // ── LOADER ──
 function hideLoader(){
   const l=document.getElementById('loader');
-  if(l)l.style.display='none';
+  if(l){l.classList.add('hide');l.style.display='none';}
 }
 hideLoader();
+setTimeout(hideLoader,500);
 setTimeout(hideLoader,1500);
-window.addEventListener('load',()=>{ setTimeout(hideLoader,300); });
+window.addEventListener('load',()=>{ setTimeout(hideLoader,200); });
 
 // ── SCROLL PROGRESS BAR ──
 const scrollBar = document.getElementById('scrollProgress');
