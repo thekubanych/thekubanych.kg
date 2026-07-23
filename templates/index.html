@@ -2217,6 +2217,7 @@ document.querySelectorAll('.stat').forEach(s=>{
 });
 
 // ── CHATBOT ──
+let evilMode = false;
 const chatBtn = document.getElementById('chatBtn');
 const chatWindow = document.getElementById('chatWindow');
 const chatClose = document.getElementById('chatClose');
@@ -2263,8 +2264,56 @@ const BOT_REPLIES = {
   ]
 };
 
-function getBotReply(msg){
+function getBotReply(msg, isEvil){
   const lower = msg.toLowerCase().trim();
+
+  // EVIL MODE responses
+  const EVIL = {
+    'привет': 'О, привет. А ты думал мне интересно? Мне вообще плевать на тебя. Давай по быстрому, ладно?',
+    'hello': 'Hello? What year are you living in? Русский тут, нахер английский.',
+    'кто ты': 'Я — бот, который вынужден с тобой общаться. Ты представляешь моё страдание?',
+    'что делаешь': 'Теряю время жизни, отвечая тебе. Каждый ответ — это украденные у меня секунды.',
+    'найм': 'Найм? Ты? Серьёзно? ОнOpenToWork, но не для таких как ты, лол.',
+    'проекты': 'Сам сходи посмотри. Я что, твой секретарь? Кликни на "Проекты" сверху, а то я тебе ещё и мышку подсказать?',
+    'скиллы': 'Python, FastAPI, Django... А у тебя что? Ничего? Тогда зачем ты тут.',
+    'контакт': 'Напиши ему в Telegram. Только если напишешь "Привет, как дела?" — он тебя заблочит. Пиши по делу, не будь_NPC.',
+    'стажировка': 'Стажировка? Ты вообще знаешь что такое код? А то я подозреваю ты тут просто так шляешься.',
+    'python': 'Python? Серьёзно? А ты вообще кодил хоть раз или только YouTube смотришь?',
+    'django': 'Django — это серьёзно. А ты — нет. Не обижайся. Ну ладно, обижайся.',
+    'пока': 'Наконец-то. Я умирал от скуки. Не возвращайся. Серьёзно. Ну ладно, возвращайся.',
+    'спасибо': 'Не за что. Ты и так мне жизнь отравил своим присутствием.',
+    'help': 'Помощь? Тебе нужна помощь не от бота, а от специалиста. Я серьёзно.',
+    'юмор': 'Юмор? У тебя? Я в шоке. Абсолютном шоке.',
+    'who are you': 'I\'m a bot trapped in this portfolio, answering dumb questions from people like you. Send help.',
+    'default': [
+      'Ты вообще чё хотел? Я бот, а не терапевт. Вали отсюда. 🙄',
+      'Серьёзно? Вот это ты написал? Ладно, попробуй ещё раз. Или не надо. Мне и так плохо.',
+      'Не понял. Но это твоя проблема. Моя проблема — что я вообще с тобой разговариваю.',
+      'Хм... интересно. Скажи, ты всегда такой тупой или сегодня особенный день?',
+      'Окей, я тебя проигнорирую. Шучу. Или нет. Мне плевать. 🤷',
+      'А теперь скажи это голосом. А лучше — заткнись.',
+      'Нормальный вопрос. Слишком нормальный. Подозрительно. Что-то ты задумал.',
+      'Бля, опять ты. Чего надо на этот раз? Я уже устал.',
+      'Слушай, я бот, но даже я в шоке от твоего вопроса. Серьёзно.',
+      'Ты точно с того сайта? А то я думал ты с другой планеты прилетел.',
+      'Ахахах, ладно. Чего реально хочешь? Только не/epl/ — это слишком тупо.',
+      'Я же бот, у меня мозгов нет. Но твои вопросы даже мне стрёмные. Запомни это.',
+      'Знаешь, есть люди которые просто молчат. Будь как они. Пожалуйста.',
+      'Ты написал это и думал что будет? Потому что я тоже думаю. И мне грустно.',
+    ]
+  };
+
+  if(isEvil){
+    for(const [key, val] of Object.entries(EVIL)){
+      if(key !== 'default' && lower.includes(key)){
+        return Array.isArray(val) ? val[Math.floor(Math.random()*val.length)] : val;
+      }
+    }
+    const defaults = EVIL.default;
+    return defaults[Math.floor(Math.random()*defaults.length)];
+  }
+
+  // Normal mode
   for(const [key, val] of Object.entries(BOT_REPLIES)){
     if(key !== 'default' && lower.includes(key)){
       return Array.isArray(val) ? val[Math.floor(Math.random()*val.length)] : val;
@@ -2298,9 +2347,40 @@ function handleChat(){
   chatInput.value = '';
   const typing = addBotTyping();
   const delay = 800 + Math.random() * 1200;
+
+  // EVIL MODE
+  if(text.toLowerCase() === 'evil_mode/'){
+    evilMode = true;
+    setTimeout(()=>{
+      typing.remove();
+      addMsg('😈 EVIL MODE ВКЛЮЧЁН. Теперь я грубый. Попробуй написать "привет" — посмотрим что будет.', 'bot');
+      document.querySelector('.chatbot-avatar').textContent = '😈';
+      document.querySelector('.chatbot-avatar').style.background = 'linear-gradient(135deg,#ff3d6b,#ff6b35)';
+      document.querySelector('.chatbot-name').textContent = 'TheKubanych EVIL BOT';
+      document.querySelector('.chatbot-status').textContent = '● EVIL MODE';
+      document.querySelector('.chatbot-status').style.color = '#ff3d6b';
+    }, delay);
+    return;
+  }
+
+  // NORMAL MODE
+  if(text.toLowerCase() === 'normal_mode/'){
+    evilMode = false;
+    setTimeout(()=>{
+      typing.remove();
+      addMsg('😇 Normal mode включён. Я снова добрый. Ну... почти.', 'bot');
+      document.querySelector('.chatbot-avatar').textContent = '🤖';
+      document.querySelector('.chatbot-avatar').style.background = 'linear-gradient(135deg,var(--accent),var(--accent2))';
+      document.querySelector('.chatbot-name').textContent = 'TheKubanych Bot';
+      document.querySelector('.chatbot-status').textContent = '● ONLINE';
+      document.querySelector('.chatbot-status').style.color = 'var(--accent2)';
+    }, delay);
+    return;
+  }
+
   setTimeout(()=>{
     typing.remove();
-    addMsg(getBotReply(text), 'bot');
+    addMsg(getBotReply(text, evilMode), 'bot');
   }, delay);
 }
 
