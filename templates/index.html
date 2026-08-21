@@ -521,39 +521,6 @@ section { padding: 120px 0; position: relative; }
 .back-to-top.visible { opacity: 1; visibility: visible; transform: translateY(0); }
 .back-to-top:hover { border-color: var(--accent); }
 
-/* ── MUSIC ── */
-.music-btn {
-  position: fixed;
-  bottom: calc(88px + env(safe-area-inset-bottom, 0px));
-  left: calc(28px + env(safe-area-inset-left, 0px));
-  z-index: 990;
-  width: 48px; height: 48px; border-radius: 50%;
-  border: 1px solid var(--border); background: var(--surface);
-  color: var(--muted); cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: all 0.3s; box-shadow: var(--shadow);
-}
-.music-btn:hover { border-color: var(--accent); color: var(--accent); }
-.music-btn.playing { color: var(--accent); border-color: var(--accent); }
-.music-btn.playing .note { animation: notePulse 1.2s ease-in-out infinite; }
-@keyframes notePulse {
-  0%, 100% { transform: scale(1) rotate(0deg); }
-  50% { transform: scale(1.2) rotate(8deg); }
-}
-.music-hint {
-  position: fixed;
-  bottom: calc(96px + env(safe-area-inset-bottom, 0px));
-  left: 50%; transform: translateX(-50%);
-  z-index: 989;
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 100px; padding: 10px 20px;
-  font-family: var(--font-mono); font-size: 12px; color: var(--text);
-  box-shadow: var(--shadow);
-  opacity: 0; visibility: hidden; transition: all 0.4s;
-  white-space: nowrap;
-}
-.music-hint.show { opacity: 1; visibility: visible; }
-
 /* ── CHATBOT ── */
 .chatbot-btn {
   position: fixed;
@@ -705,15 +672,6 @@ section { padding: 120px 0; position: relative; }
     max-height: 70svh;
   }
   .chatbot-btn { left: 16px; }
-  .music-btn {
-    left: 16px;
-    bottom: calc(84px + env(safe-area-inset-bottom, 0px));
-  }
-  .music-hint {
-    bottom: calc(150px + env(safe-area-inset-bottom, 0px));
-    font-size: 11px; padding: 9px 16px; max-width: calc(100vw - 32px);
-    white-space: normal; text-align: center;
-  }
   .back-to-top {
     right: 16px;
     bottom: calc(20px + env(safe-area-inset-bottom, 0px));
@@ -1223,15 +1181,6 @@ section { padding: 120px 0; position: relative; }
   <div class="konami-sub">↑ ↑ ↓ ↓ ← → ← → B A</div>
   <button class="konami-close" onclick="document.getElementById('konamiOverlay').classList.remove('active')">CLOSE</button>
 </div>
-
-<!-- MUSIC -->
-<div id="ytPlayerWrap" aria-hidden="true" style="position:absolute;width:1px;height:1px;left:-9999px;overflow:hidden"></div>
-<button class="music-btn" id="musicBtn" title="Музыка вкл/выкл">
-  <svg class="note" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M9 18.5a3.5 3.5 0 1 1-2-3.16V5l12-2v11.5a3.5 3.5 0 1 1-2-3.16V6.4L9 8.06V18.5z"/>
-  </svg>
-</button>
-<div class="music-hint" id="musicHint">🎵 Нажми в любом месте — заиграет музыка</div>
 
 <!-- CHATBOT -->
 <button class="chatbot-btn" id="chatBtn" title="Поговори со мной">🤖</button>
@@ -1834,67 +1783,6 @@ chatInput.addEventListener('keydown', e => { if(e.key === 'Enter') handleChat();
   });
   themeToggle.addEventListener('click', applyThemeColors);
 })();
-
-// ── MUSIC (YouTube) ──
-const MUSIC_VIDEO_ID = 'wBf7Kp0vOXQ';
-let musicOn = false;
-let userInteracted = false;
-const musicWrap = document.getElementById('ytPlayerWrap');
-const musicBtn = document.getElementById('musicBtn');
-const musicHint = document.getElementById('musicHint');
-
-function musicSrc(){
-  return 'https://www.youtube-nocookie.com/embed/' + MUSIC_VIDEO_ID +
-    '?autoplay=1&mute=0&controls=0&disablekb=1&loop=1&playlist=' + MUSIC_VIDEO_ID +
-    '&playsinline=1&rel=0';
-}
-
-// player is created INSIDE the first user gesture — browsers always allow sound then
-function startMusic(){
-  if(musicOn) return;
-  musicOn = true;
-  musicBtn.classList.add('playing');
-  const f = document.createElement('iframe');
-  f.id = 'ytFrame';
-  f.allow = 'autoplay; encrypted-media';
-  f.title = 'Music';
-  f.style.cssText = 'width:1px;height:1px;border:0;position:absolute;left:-9999px';
-  f.src = musicSrc();
-  musicWrap.innerHTML = '';
-  musicWrap.appendChild(f);
-}
-function stopMusic(){
-  if(!musicOn) return;
-  musicOn = false;
-  musicBtn.classList.remove('playing');
-  musicWrap.innerHTML = ''; // stops instantly
-}
-
-function hideHint(){ if(musicHint) musicHint.classList.remove('show'); }
-
-function firstGesture(){
-  if(userInteracted) return;
-  userInteracted = true;
-  hideHint();
-  startMusic();
-}
-['pointerdown', 'touchstart', 'keydown', 'click'].forEach(evt => {
-  window.addEventListener(evt, firstGesture, { passive: true });
-});
-
-musicBtn.addEventListener('click', (e) => {
-  e.stopPropagation();
-  if(!userInteracted){ firstGesture(); return; }
-  musicOn ? stopMusic() : startMusic();
-});
-
-// show hint if user hasn't interacted yet
-setTimeout(() => {
-  if(!userInteracted && musicHint){
-    musicHint.classList.add('show');
-    setTimeout(hideHint, 9000);
-  }
-}, 2000);
 
 // ── INIT ──
 loadSkills();
