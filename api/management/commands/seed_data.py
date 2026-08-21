@@ -53,7 +53,7 @@ class Command(BaseCommand):
 
         experience = [
             {'company': 'Optima Bank', 'role': 'Backend Developer', 'period': '2025 — н.в.', 'description': 'Банковская разработка, backend-системы.', 'order': 0},
-            {'company': 'БГУ им. К. Карасаева', 'role': 'Студент', 'period': '2023 — н.в.', 'description': 'Программирование, backend разработка.', 'order': 1},
+            {'company': 'SoftJol', 'role': 'Студент', 'period': '2023 — н.в.', 'description': 'Программирование, backend разработка.', 'order': 1},
             {'company': 'Фриланс', 'role': 'Backend Developer', 'period': '2024 — н.в.', 'description': 'Pet-проекты, телеграм боты.', 'order': 2},
         ]
         for e in experience:

@@ -10,7 +10,7 @@ class SkillAdmin(admin.ModelAdmin):
     list_filter = ['category']
 
     def bar(self, obj):
-        color = '#6c47ff' if obj.percent >= 70 else '#00ffb3'
+        color = '#3b82f6' if obj.percent >= 70 else '#60a5fa'
         return format_html(
             '<div style="width:100px;background:#222;border-radius:4px">'
             '<div style="width:{}%;background:{};height:8px;border-radius:4px"></div>'
@@ -26,9 +26,9 @@ class ProjectAdmin(admin.ModelAdmin):
     search_fields = ['title']
 
     def status_badge(self, obj):
-        colors = {'active': '#00ffb3', 'done': '#6c47ff', 'planned': '#ff3d6b'}
+        colors = {'active': '#3b82f6', 'done': '#60a5fa', 'planned': '#ef4444'}
         return format_html(
-            '<span style="background:{};color:#000;padding:2px 10px;border-radius:20px;font-size:11px">{}</span>',
+            '<span style="background:{};color:#fff;padding:2px 10px;border-radius:20px;font-size:11px">{}</span>',
             colors.get(obj.status, '#888'), obj.get_status_display())
     status_badge.short_description = 'Статус'
 
@@ -37,24 +37,16 @@ class ProjectAdmin(admin.ModelAdmin):
 class ContactMessageAdmin(admin.ModelAdmin):
     list_display = ['name', 'email', 'subject', 'status', 'created_at']
     list_filter = ['status']
-    readonly_fields = ['name', 'email', 'subject', 'message', 'ip_address', 'created_at']
     search_fields = ['name', 'email']
-
-    def has_add_permission(self, request):
-        return False
 
 
 @admin.register(PageView)
 class PageViewAdmin(admin.ModelAdmin):
     list_display = ['date', 'count', 'unique_count']
-    readonly_fields = ['date', 'count', 'unique_ips']
 
     def unique_count(self, obj):
         return len(obj.unique_ips)
     unique_count.short_description = 'Уникальных'
-
-    def has_add_permission(self, request):
-        return False
 
 
 
@@ -62,7 +54,6 @@ class PageViewAdmin(admin.ModelAdmin):
 class TelegramUserAdmin(admin.ModelAdmin):
     list_display = ['full_name', 'username_link', 'telegram_id', 'created_at']
     search_fields = ['first_name', 'last_name', 'username']
-    readonly_fields = ['telegram_id', 'first_name', 'last_name', 'username', 'photo_url', 'created_at']
 
     def username_link(self, obj):
         if obj.username:

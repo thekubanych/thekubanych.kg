@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="light">
+<html lang="ru" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -15,8 +15,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
-  --accent: #5b3ff2;
-  --accent-soft: rgba(91,63,242,0.1);
+  --accent: #3b82f6;
+  --accent-soft: rgba(59,130,246,0.12);
+  --accent-hover: #60a5fa;
   --font-body: 'Inter', -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 }
@@ -263,7 +264,7 @@ section { padding: 120px 0; position: relative; }
 }
 .btn:hover { transform: translateY(-2px); box-shadow: var(--shadow); border-color: var(--accent); }
 .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-.btn.primary:hover { box-shadow: 0 10px 30px rgba(91,63,242,0.3); }
+.btn.primary:hover { box-shadow: 0 10px 30px rgba(59,130,246,0.35); }
 .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 40px; }
 
 /* socials */
@@ -426,7 +427,7 @@ section { padding: 120px 0; position: relative; }
 }
 .pstack img { width: 14px; height: 14px; object-fit: contain; }
 .pstack.green { border-color: rgba(16,185,129,0.35); color: #10b981; background: rgba(16,185,129,0.06); }
-.pstack.purple { border-color: rgba(91,63,242,0.35); color: var(--accent); background: var(--accent-soft); }
+.pstack.purple { border-color: rgba(59,130,246,0.4); color: var(--accent); background: var(--accent-soft); }
 .pstack.red { border-color: rgba(239,68,68,0.35); color: #ef4444; background: rgba(239,68,68,0.06); }
 
 /* ── EXPERIENCE ── */
@@ -463,9 +464,9 @@ section { padding: 120px 0; position: relative; }
 .github-stat-label { font-family: var(--font-mono); font-size: 10px; color: var(--muted); letter-spacing: 1.5px; margin-top: 4px; }
 .contrib-graph { display: flex; gap: 3px; flex-wrap: wrap; }
 .contrib-cell { width: 12px; height: 12px; border-radius: 3px; background: var(--border); transition: transform 0.2s; }
-.contrib-cell.l1 { background: rgba(91,63,242,0.25); }
-.contrib-cell.l2 { background: rgba(91,63,242,0.5); }
-.contrib-cell.l3 { background: rgba(91,63,242,0.75); }
+.contrib-cell.l1 { background: rgba(59,130,246,0.25); }
+.contrib-cell.l2 { background: rgba(59,130,246,0.5); }
+.contrib-cell.l3 { background: rgba(59,130,246,0.75); }
 .contrib-cell.l4 { background: var(--accent); }
 .contrib-cell:hover { transform: scale(1.35); }
 .github-lang-bar { display: flex; gap: 14px; margin-top: 18px; flex-wrap: wrap; }
@@ -519,6 +520,26 @@ section { padding: 120px 0; position: relative; }
 }
 .back-to-top.visible { opacity: 1; visibility: visible; transform: translateY(0); }
 .back-to-top:hover { border-color: var(--accent); }
+
+/* ── MUSIC ── */
+.music-btn {
+  position: fixed;
+  bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+  left: calc(28px + env(safe-area-inset-left, 0px));
+  z-index: 990;
+  width: 48px; height: 48px; border-radius: 50%;
+  border: 1px solid var(--border); background: var(--surface);
+  color: var(--muted); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.3s; box-shadow: var(--shadow);
+}
+.music-btn:hover { border-color: var(--accent); color: var(--accent); }
+.music-btn.playing { color: var(--accent); border-color: var(--accent); }
+.music-btn.playing .note { animation: notePulse 1.2s ease-in-out infinite; }
+@keyframes notePulse {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.2) rotate(8deg); }
+}
 
 /* ── CHATBOT ── */
 .chatbot-btn {
@@ -671,6 +692,10 @@ section { padding: 120px 0; position: relative; }
     max-height: 70svh;
   }
   .chatbot-btn { left: 16px; }
+  .music-btn {
+    left: 16px;
+    bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+  }
   .back-to-top {
     right: 16px;
     bottom: calc(20px + env(safe-area-inset-bottom, 0px));
@@ -1181,6 +1206,14 @@ section { padding: 120px 0; position: relative; }
   <button class="konami-close" onclick="document.getElementById('konamiOverlay').classList.remove('active')">CLOSE</button>
 </div>
 
+<!-- MUSIC -->
+<div id="ytPlayerWrap" aria-hidden="true" style="position:absolute;width:1px;height:1px;left:-9999px;overflow:hidden"></div>
+<button class="music-btn" id="musicBtn" title="Музыка вкл/выкл">
+  <svg class="note" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M9 18.5a3.5 3.5 0 1 1-2-3.16V5l12-2v11.5a3.5 3.5 0 1 1-2-3.16V6.4L9 8.06V18.5z"/>
+  </svg>
+</button>
+
 <!-- CHATBOT -->
 <button class="chatbot-btn" id="chatBtn" title="Поговори со мной">🤖</button>
 <div class="chatbot-window" id="chatWindow">
@@ -1213,7 +1246,7 @@ function applyTheme(t){
   sunIcon.style.display = t === 'dark' ? 'inline' : 'none';
   moonIcon.style.display = t === 'dark' ? 'none' : 'inline';
 }
-applyTheme(localStorage.getItem('theme') || 'light');
+applyTheme(localStorage.getItem('theme') || 'dark');
 themeToggle.addEventListener('click', () => {
   const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
   applyTheme(next);
@@ -1513,11 +1546,11 @@ const TRANSLATIONS = {
     social_find:'FIND ME', badge_open:'Open to work', badge_views:'👁 views',
     about_tag:'ABOUT ME', about_title_1:"Hi, I'm",
     about_p1:"I'm passionate about backend development — building reliable APIs, designing databases, and deploying apps to production. I write code every day and love turning complex problems into simple solutions.",
-    about_p2:"I'm a 2nd-year student at Bishkek State University, majoring in Computer Science. Open to internships and side projects — ready to work in a team and learn from experienced developers.",
+    about_p2:"I'm studying at SoftJol — writing code and practicing on real tasks every day. Open to internships and side projects — ready to work in a team and learn from experienced developers.",
     chip_goal:'🎯 Internship / Junior Backend', chip_city:'📍 Bishkek, Kyrgyzstan', chip_langs:'🌐 RU / KG / EN',
-    card_edu_title:'Education',
-    card_edu_text:'Bishkek State University · Faculty of Information Technology',
-    card_edu_year:'Year 2 · 2023–2027', card_edu_progress:'Study progress',
+    card_edu_title:'Learning',
+    card_edu_text:'SoftJol · Backend Development',
+    card_edu_year:'Year 2', card_edu_progress:'Study progress',
     card_interests_title:'Interests',
     card_interests_text:'Microservice architecture, DevOps, Telegram bots, automation. In my spare time I explore Go and study system design.',
     card_status_title:'Status',
@@ -1535,14 +1568,12 @@ const TRANSLATIONS = {
     proj1_desc:'Server-side web app with authentication, database integration and Swagger docs.',
     proj1_status:'In progress',
     proj2_title:'Telegram Bot', proj2_desc:'Bot built with aiogram featuring inline buttons and external API integrations.',
-    proj3_title:'BSU Study Projects', proj3_desc:'Academic programming assignments. 2nd year, actively working.',
-    proj3_tag1:'Study', proj3_tag2:'BSU',
     sec_exp:'EXPERIENCE', sec_exp_title:'Where I', sec_exp_em:'work',
     sec_github:'GITHUB', sec_github_title:'My', sec_github_em:'profile',
     sec_contact:'CONTACT', contact_title1:"Let's", contact_title2:'work', contact_title3:'together',
     contact_sub:'Open to internships, projects, and interesting conversations',
     contact_divider:'reach out directly',
-    footer:'© 2025 TheKubanych · Backend Developer · BSU',
+    footer:'© 2025 TheKubanych · Backend Developer · SoftJol',
     banner_text:'✦ Open to internships and projects · Available for remote work'
   }
 };
@@ -1664,7 +1695,7 @@ chatInput.addEventListener('keydown', e => { if(e.key === 'Enter') handleChat();
   camera.position.z = 14;
 
   const isDark = () => document.documentElement.getAttribute('data-theme') !== 'light';
-  const accentColor = () => isDark() ? '#7c6bff' : '#5b3ff2';
+  const accentColor = () => isDark() ? '#3b82f6' : '#3b82f6';
 
   scene.add(new THREE.AmbientLight(0xffffff, 0.8));
   const dir = new THREE.DirectionalLight(0xffffff, 0.5);
@@ -1784,6 +1815,69 @@ chatInput.addEventListener('keydown', e => { if(e.key === 'Enter') handleChat();
   });
   themeToggle.addEventListener('click', applyThemeColors);
 })();
+
+// ── MUSIC (YouTube) ──
+const MUSIC_VIDEO_ID = 'wBf7Kp0vOXQ';
+let ytPlayer = null;
+let ytReady = false;
+let musicOn = false;
+let userInteracted = false;
+const musicBtn = document.getElementById('musicBtn');
+
+(function loadYT(){
+  const tag = document.createElement('script');
+  tag.src = 'https://www.youtube.com/iframe_api';
+  document.head.appendChild(tag);
+})();
+
+window.onYouTubeIframeAPIReady = function(){
+  ytPlayer = new YT.Player('ytPlayerWrap', {
+    videoId: MUSIC_VIDEO_ID,
+    playerVars: {
+      autoplay: 0, controls: 0, disablekb: 1,
+      loop: 1, playlist: MUSIC_VIDEO_ID,
+      playsinline: 1, rel: 0
+    },
+    events: {
+      onReady: (e) => {
+        ytReady = true;
+        e.target.setVolume(45);
+        if(musicOn) { try { e.target.playVideo(); } catch(err){} }
+      },
+      onStateChange: (e) => {
+        // restart on end (fallback if loop fails)
+        if(e.data === YT.PlayerState.ENDED){ try { e.target.seekTo(0); e.target.playVideo(); } catch(err){} }
+      }
+    }
+  });
+};
+
+function startMusic(){
+  if(musicOn) return;
+  musicOn = true;
+  musicBtn.classList.add('playing');
+  if(ytReady){ try { ytPlayer.playVideo(); } catch(e){} }
+}
+function stopMusic(){
+  if(!musicOn) return;
+  musicOn = false;
+  musicBtn.classList.remove('playing');
+  if(ytReady){ try { ytPlayer.pauseVideo(); } catch(e){} }
+}
+
+// autoplay on first interaction (browser policy: sound needs a gesture)
+['pointerdown', 'keydown', 'touchstart'].forEach(evt => {
+  window.addEventListener(evt, () => {
+    if(userInteracted) return;
+    userInteracted = true;
+    startMusic();
+  }, { once: true, passive: true });
+});
+
+musicBtn.addEventListener('click', () => {
+  if(!userInteracted){ userInteracted = true; startMusic(); return; }
+  musicOn ? stopMusic() : startMusic();
+});
 
 // ── INIT ──
 loadSkills();
