@@ -540,6 +540,19 @@ section { padding: 120px 0; position: relative; }
   0%, 100% { transform: scale(1) rotate(0deg); }
   50% { transform: scale(1.2) rotate(8deg); }
 }
+.music-hint {
+  position: fixed;
+  bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+  left: 50%; transform: translateX(-50%);
+  z-index: 989;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 100px; padding: 10px 20px;
+  font-family: var(--font-mono); font-size: 12px; color: var(--text);
+  box-shadow: var(--shadow);
+  opacity: 0; visibility: hidden; transition: all 0.4s;
+  white-space: nowrap;
+}
+.music-hint.show { opacity: 1; visibility: visible; }
 
 /* ── CHATBOT ── */
 .chatbot-btn {
@@ -695,6 +708,11 @@ section { padding: 120px 0; position: relative; }
   .music-btn {
     left: 16px;
     bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+  }
+  .music-hint {
+    bottom: calc(150px + env(safe-area-inset-bottom, 0px));
+    font-size: 11px; padding: 9px 16px; max-width: calc(100vw - 32px);
+    white-space: normal; text-align: center;
   }
   .back-to-top {
     right: 16px;
@@ -1213,6 +1231,7 @@ section { padding: 120px 0; position: relative; }
     <path d="M9 18.5a3.5 3.5 0 1 1-2-3.16V5l12-2v11.5a3.5 3.5 0 1 1-2-3.16V6.4L9 8.06V18.5z"/>
   </svg>
 </button>
+<div class="music-hint" id="musicHint">🎵 Нажми в любом месте — заиграет музыка</div>
 
 <!-- CHATBOT -->
 <button class="chatbot-btn" id="chatBtn" title="Поговори со мной">🤖</button>
@@ -1818,66 +1837,64 @@ chatInput.addEventListener('keydown', e => { if(e.key === 'Enter') handleChat();
 
 // ── MUSIC (YouTube) ──
 const MUSIC_VIDEO_ID = 'wBf7Kp0vOXQ';
-let ytPlayer = null;
-let ytReady = false;
 let musicOn = false;
 let userInteracted = false;
+const musicWrap = document.getElementById('ytPlayerWrap');
 const musicBtn = document.getElementById('musicBtn');
+const musicHint = document.getElementById('musicHint');
 
-(function loadYT(){
-  const tag = document.createElement('script');
-  tag.src = 'https://www.youtube.com/iframe_api';
-  document.head.appendChild(tag);
-})();
+function musicSrc(){
+  return 'https://www.youtube-nocookie.com/embed/' + MUSIC_VIDEO_ID +
+    '?autoplay=1&mute=0&controls=0&disablekb=1&loop=1&playlist=' + MUSIC_VIDEO_ID +
+    '&playsinline=1&rel=0';
+}
 
-window.onYouTubeIframeAPIReady = function(){
-  ytPlayer = new YT.Player('ytPlayerWrap', {
-    videoId: MUSIC_VIDEO_ID,
-    playerVars: {
-      autoplay: 0, controls: 0, disablekb: 1,
-      loop: 1, playlist: MUSIC_VIDEO_ID,
-      playsinline: 1, rel: 0
-    },
-    events: {
-      onReady: (e) => {
-        ytReady = true;
-        e.target.setVolume(45);
-        if(musicOn) { try { e.target.playVideo(); } catch(err){} }
-      },
-      onStateChange: (e) => {
-        // restart on end (fallback if loop fails)
-        if(e.data === YT.PlayerState.ENDED){ try { e.target.seekTo(0); e.target.playVideo(); } catch(err){} }
-      }
-    }
-  });
-};
-
+// player is created INSIDE the first user gesture — browsers always allow sound then
 function startMusic(){
   if(musicOn) return;
   musicOn = true;
   musicBtn.classList.add('playing');
-  if(ytReady){ try { ytPlayer.playVideo(); } catch(e){} }
+  const f = document.createElement('iframe');
+  f.id = 'ytFrame';
+  f.allow = 'autoplay; encrypted-media';
+  f.title = 'Music';
+  f.style.cssText = 'width:1px;height:1px;border:0;position:absolute;left:-9999px';
+  f.src = musicSrc();
+  musicWrap.innerHTML = '';
+  musicWrap.appendChild(f);
 }
 function stopMusic(){
   if(!musicOn) return;
   musicOn = false;
   musicBtn.classList.remove('playing');
-  if(ytReady){ try { ytPlayer.pauseVideo(); } catch(e){} }
+  musicWrap.innerHTML = ''; // stops instantly
 }
 
-// autoplay on first interaction (browser policy: sound needs a gesture)
-['pointerdown', 'keydown', 'touchstart'].forEach(evt => {
-  window.addEventListener(evt, () => {
-    if(userInteracted) return;
-    userInteracted = true;
-    startMusic();
-  }, { once: true, passive: true });
+function hideHint(){ if(musicHint) musicHint.classList.remove('show'); }
+
+function firstGesture(){
+  if(userInteracted) return;
+  userInteracted = true;
+  hideHint();
+  startMusic();
+}
+['pointerdown', 'touchstart', 'keydown', 'click'].forEach(evt => {
+  window.addEventListener(evt, firstGesture, { passive: true });
 });
 
-musicBtn.addEventListener('click', () => {
-  if(!userInteracted){ userInteracted = true; startMusic(); return; }
+musicBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  if(!userInteracted){ firstGesture(); return; }
   musicOn ? stopMusic() : startMusic();
 });
+
+// show hint if user hasn't interacted yet
+setTimeout(() => {
+  if(!userInteracted && musicHint){
+    musicHint.classList.add('show');
+    setTimeout(hideHint, 9000);
+  }
+}, 2000);
 
 // ── INIT ──
 loadSkills();

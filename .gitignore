@@ -6,3 +6,4 @@ staticfiles/
 media/
 .DS_Store
 *.pub
+.venv/
