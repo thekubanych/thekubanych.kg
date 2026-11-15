@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
-from django.db.models import Sum
+from django.db.models import F, Sum
+from django.utils import timezone
 
 
 class TelegramUser(models.Model):
@@ -170,8 +171,14 @@ class ContactMessage(models.Model):
         return f"{self.name}{via} — {self.subject}"
 
 
+class ContactRateLimit(models.Model):
+    ip_address = models.GenericIPAddressField(primary_key=True)
+    window_start = models.DateTimeField(default=timezone.now)
+    count = models.PositiveIntegerField(default=0)
+
+
 class PageView(models.Model):
-    date = models.DateField(auto_now_add=True, db_index=True)
+    date = models.DateField(default=timezone.localdate, unique=True)
     count = models.PositiveIntegerField(default=0, validators=[MinValueValidator(0)])
     unique_ips = models.JSONField(default=list)
     class Meta:
@@ -181,6 +188,21 @@ class PageView(models.Model):
 
     def __str__(self):
         return f"{self.date} — {self.count} просмотров"
+
+    @classmethod
+    def record(cls, ip):
+        row, _ = cls.objects.get_or_create(date=timezone.localdate())
+        cls.objects.filter(pk=row.pk).update(count=F('count') + 1)
+        if not ip:
+            return
+        # Compare-and-swap preserves visitors added by another worker, including SQLite.
+        while ip not in row.unique_ips:
+            previous_ips = row.unique_ips
+            if cls.objects.filter(pk=row.pk, unique_ips=previous_ips).update(
+                unique_ips=previous_ips + [ip]
+            ):
+                break
+            row.refresh_from_db(fields=['unique_ips'])
 
     @classmethod
     def get_total(cls) -> int:

@@ -1,4 +1,10 @@
-from datetime import date
+import logging
+
+from django.db import DatabaseError
+
+from .client_ip import get_client_ip
+
+logger = logging.getLogger(__name__)
 
 
 class PageViewMiddleware:
@@ -21,12 +27,7 @@ class PageViewMiddleware:
     def _record(self, request):
         try:
             from .models import PageView
-            ip = request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0].strip() \
-                 or request.META.get('REMOTE_ADDR', '')
-            pv, _ = PageView.objects.get_or_create(date=date.today())
-            pv.count += 1
-            if ip and ip not in pv.unique_ips:
-                pv.unique_ips.append(ip)
-            pv.save(update_fields=['count', 'unique_ips'])
-        except Exception:
-            pass
+            PageView.record(get_client_ip(request))
+        except DatabaseError:
+            logger.exception('Could not record page view')
+

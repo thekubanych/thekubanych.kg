@@ -46,6 +46,12 @@
   --shadow-lift: 0 2px 4px rgba(0,0,0,0.35), 0 24px 60px rgba(0,0,0,0.5);
 }
 
+:root {
+  --glow: rgba(59,130,246,0.28);
+  --glass: rgba(19,19,27,0.68);
+}
+:root[data-theme="light"] { --glass: rgba(255,255,255,0.72); --glow: rgba(59,130,246,0.16); }
+
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 html { scroll-behavior: smooth; scroll-padding-top: 112px; }
 body {
@@ -60,6 +66,15 @@ body {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   overscroll-behavior-y: contain;
+  background-image:
+    radial-gradient(circle at 78% 12%, var(--glow), transparent 24rem),
+    radial-gradient(circle at 6% 78%, rgba(124,58,237,0.10), transparent 26rem);
+}
+body::after {
+  content: ''; position: fixed; z-index: 0; pointer-events: none;
+  width: 520px; height: 520px; left: calc(var(--cursor-x, 50vw) - 260px); top: calc(var(--cursor-y, 35vh) - 260px);
+  border-radius: 50%; background: radial-gradient(circle, rgba(96,165,250,.09), transparent 68%);
+  mix-blend-mode: screen; transition: left .18s ease-out, top .18s ease-out;
 }
 ::selection { background: var(--accent); color: #fff; }
 a { color: inherit; text-decoration: none; }
@@ -68,8 +83,21 @@ button { font-family: inherit; }
 button, a, input, textarea { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 button { -webkit-appearance: none; appearance: none; }
 
-.container { max-width: 1080px; margin: 0 auto; padding: 0 32px; }
+.container { max-width: 1080px; margin: 0; padding: 0 32px 0 clamp(28px, 8vw, 120px); }
 .mono { font-family: var(--font-mono); }
+
+/* premium depth layer */
+section::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none; opacity: .55;
+  background: linear-gradient(120deg, transparent 30%, rgba(59,130,246,.025) 50%, transparent 70%);
+}
+#hero::after {
+  content: ''; position: absolute; width: 42vw; height: 42vw; max-width: 620px; max-height: 620px;
+  right: 4vw; top: 14%; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle, rgba(59,130,246,.12), transparent 68%);
+  filter: blur(12px); animation: heroGlow 8s ease-in-out infinite alternate;
+}
+@keyframes heroGlow { from { transform: scale(.92); opacity: .55; } to { transform: scale(1.08); opacity: 1; } }
 
 /* ── SCROLL PROGRESS ── */
 .scroll-progress {
@@ -77,14 +105,48 @@ button { -webkit-appearance: none; appearance: none; }
   background: var(--accent); width: 0%;
 }
 
-/* ── 3D BACKGROUND ── */
-#three-bg {
+/* ── LOADER ── */
+#pageLoader {
+  position: fixed; inset: 0; z-index: 100000; display: grid; place-items: center;
+  background: #080a12; transition: opacity .7s ease, visibility .7s ease;
+  animation: loaderAutoHide .8s ease 2.8s forwards;
+}
+#pageLoader.done { opacity: 0; visibility: hidden; pointer-events: none; }
+@keyframes loaderAutoHide { to { opacity: 0; visibility: hidden; pointer-events: none; } }
+.loader-mark { position: relative; width: 120px; height: 120px; display: grid; place-items: center; }
+.loader-ring { position: absolute; inset: 0; border: 1px solid rgba(96,165,250,.25); border-top-color: #60a5fa; border-radius: 50%; animation: loaderSpin 1.4s linear infinite; }
+.loader-ring:nth-child(2) { inset: 14px; border-color: rgba(167,139,250,.28); border-right-color: #a78bfa; animation-direction: reverse; animation-duration: 2s; }
+.loader-name { font: 700 16px var(--font-mono); letter-spacing: 2px; color: #eaf2ff; }
+@keyframes loaderSpin { to { transform: rotate(360deg); } }
+
+/* ── 3D JOURNEY ── */
+#journey {
   position: fixed; inset: 0; z-index: 0;
   width: 100%; height: 100%;
   pointer-events: none;
 }
-@media (prefers-reduced-motion: reduce) {
-  #three-bg { opacity: 0.5; }
+.journey-hud {
+  position: fixed; z-index: 5; pointer-events: none;
+  left: calc(22px + env(safe-area-inset-left, 0px));
+  top: 50%; transform: translateY(-50%) rotate(180deg);
+  writing-mode: vertical-rl;
+  display: none; align-items: center; gap: 12px;
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: 2px;
+  color: var(--muted);
+}
+.journey-hud .hud-idx { color: var(--accent); }
+.journey-hud .hud-name::before { content: ''; display: inline-block; width: 1px; height: 28px; background: var(--border-strong); margin-bottom: 12px; }
+.has-journey .journey-hud { display: flex; }
+/* let the scene show through sections that used to be opaque bands */
+.has-journey #about, .has-journey #certs, .has-journey #experience {
+  background: linear-gradient(180deg, transparent, rgba(59,130,246,.035) 18%, rgba(59,130,246,.035) 82%, transparent);
+  border-color: transparent;
+}
+.has-journey .lab-section { border-color: transparent; }
+.has-journey #hero::after { display: none; }
+@media (max-width: 900px) {
+  #journey { opacity: .62; }
+  .has-journey .journey-hud { display: none; }
 }
 
 /* ── NAV ── */
@@ -99,6 +161,7 @@ nav {
   transition: all 0.3s;
 }
 nav.scrolled { border-bottom-color: var(--border); }
+.nav-inner { max-width: 1240px; margin: 0 auto; padding: 0 28px; }
 .nav-inner { display: flex; align-items: center; justify-content: space-between; width: 100%; }
 .nav-logo {
   font-weight: 800; font-size: 19px; letter-spacing: -0.5px;
@@ -216,7 +279,10 @@ section { padding: 120px 0; position: relative; }
   min-height: 100svh;
   display: flex; align-items: center;
   padding-top: 150px; padding-bottom: 60px;
+  isolation: isolate;
 }
+.hero-grid, .hero-scroll-cue { position: relative; z-index: 2; }
+.hero-left { position: relative; z-index: 2; }
 .hero-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 72px; align-items: center; }
 .hero-eyebrow {
   display: inline-flex; align-items: center; gap: 10px;
@@ -227,8 +293,13 @@ section { padding: 120px 0; position: relative; }
 .hero-name {
   font-size: clamp(48px, 7vw, 84px); font-weight: 800;
   letter-spacing: -3px; line-height: 1.02; margin-bottom: 20px;
+  text-wrap: balance;
 }
-.hero-name .line2 { color: var(--accent); }
+.hero-name .line2 {
+  color: var(--accent);
+  background: linear-gradient(110deg, #60a5fa 0%, #3b82f6 42%, #a78bfa 100%);
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+}
 .hero-role {
   font-family: var(--font-mono); font-size: 15px; color: var(--muted);
   margin-bottom: 28px; min-height: 24px;
@@ -263,6 +334,9 @@ section { padding: 120px 0; position: relative; }
   position: relative;
 }
 .btn:hover { transform: translateY(-2px); box-shadow: var(--shadow); border-color: var(--accent); }
+.btn { box-shadow: 0 8px 30px rgba(0,0,0,.08); }
+.btn::after { content: ''; position: absolute; inset: 0; border-radius: inherit; opacity: 0; background: linear-gradient(110deg, transparent, rgba(255,255,255,.18), transparent); transform: translateX(-100%); transition: transform .5s, opacity .3s; }
+.btn:hover::after { opacity: 1; transform: translateX(100%); }
 .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
 .btn.primary:hover { box-shadow: 0 10px 30px rgba(59,130,246,0.35); }
 .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 40px; }
@@ -284,7 +358,8 @@ section { padding: 120px 0; position: relative; }
 .photo-container { width: 300px; height: 380px; position: relative; }
 .photo-frame {
   position: absolute; inset: 0; border-radius: 22px;
-  border: 1px solid var(--border); background: var(--surface2);
+  border: 1px solid rgba(147,197,253,.28); background: var(--glass);
+  box-shadow: 0 24px 80px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.12);
   overflow: hidden; transition: transform 0.4s, box-shadow 0.4s;
 }
 .photo-container:hover .photo-frame { transform: translateY(-8px); box-shadow: var(--shadow-lift); }
@@ -305,14 +380,43 @@ section { padding: 120px 0; position: relative; }
   background: var(--surface); border: 1px solid var(--border);
   border-radius: 10px; padding: 8px 14px; box-shadow: var(--shadow);
 }
-.views-badge {
-  position: absolute; top: 50%; right: -30px;
-  font-family: var(--font-mono); font-size: 10px; color: var(--muted);
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 10px; padding: 8px 12px; text-align: center;
-  flex-direction: column; gap: 2px; box-shadow: var(--shadow);
+.photo-orbit {
+  position: absolute; z-index: 3; font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 1.2px; color: var(--accent); background: var(--glass);
+  border: 1px solid rgba(147,197,253,.28); border-radius: 999px; padding: 8px 12px;
+  backdrop-filter: blur(10px); box-shadow: 0 8px 30px rgba(0,0,0,.18);
+  animation: orbitFloat 4s ease-in-out infinite;
 }
-.views-num { font-size: 16px; font-weight: 600; color: var(--text); }
+.photo-orbit:empty { visibility: hidden; }
+.photo-orbit.one { left: -54px; top: 92px; }
+.photo-orbit.two { right: -42px; bottom: 88px; animation-delay: -1.7s; }
+@keyframes orbitFloat { 0%,100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-10px) rotate(2deg); } }
+.hero-scroll-cue {
+  position: absolute; bottom: 28px; left: clamp(28px, 8vw, 120px);
+  display: flex; align-items: center; gap: 12px; color: var(--muted);
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+}
+.hero-scroll-cue::before { content: ''; width: 34px; height: 1px; background: var(--accent); }
+.hero-scroll-cue::after { content: '↓'; color: var(--accent); animation: cueBounce 1.8s ease-in-out infinite; }
+@keyframes cueBounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(5px); } }
+
+/* ── CODE LAB ── */
+.lab-section { background: linear-gradient(135deg, rgba(59,130,246,.04), transparent 55%); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.lab-layout { display: grid; grid-template-columns: 1.15fr .85fr; gap: 34px; align-items: stretch; }
+.terminal-window { min-height: 320px; overflow: hidden; border: 1px solid rgba(147,197,253,.22); border-radius: 18px; background: rgba(8,10,18,.88); box-shadow: 0 24px 80px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.08); }
+.terminal-bar { display: flex; align-items: center; gap: 7px; padding: 14px 16px; border-bottom: 1px solid rgba(147,197,253,.14); color: #8b9bb7; font: 11px var(--font-mono); }
+.terminal-dot { width: 9px; height: 9px; border-radius: 50%; background: #fb7185; }.terminal-dot:nth-child(2){background:#fbbf24}.terminal-dot:nth-child(3){background:#34d399}
+.terminal-title { margin-left: 8px; opacity: .7; }
+.terminal-output { padding: 18px 20px 8px; height: 232px; overflow: auto; color: #cbd5e1; font: 12px/1.75 var(--font-mono); }
+.terminal-output .term-accent { color: #60a5fa; }.terminal-output .term-green { color: #34d399; }.terminal-output .term-muted { color: #71809b; }
+.terminal-form { display: flex; gap: 9px; padding: 12px 20px 18px; color: #60a5fa; font: 12px var(--font-mono); }
+.terminal-form input { min-width: 0; flex: 1; background: transparent; border: 0; outline: 0; color: #f8fafc; font: inherit; }
+.lab-copy { display: flex; flex-direction: column; justify-content: center; padding: 22px 4px; }
+.lab-copy h3 { font-size: clamp(25px, 3vw, 38px); line-height: 1.1; margin-bottom: 18px; letter-spacing: -1px; }
+.lab-copy p { color: var(--muted); max-width: 420px; margin-bottom: 22px; }
+.lab-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.lab-metric { padding: 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--glass); }
+.lab-metric strong { display: block; font: 700 20px var(--font-mono); color: var(--accent); }.lab-metric span { color: var(--muted); font: 10px var(--font-mono); letter-spacing: 1px; }
 
 /* ── ABOUT ── */
 #about { background: var(--surface2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
@@ -330,7 +434,8 @@ section { padding: 120px 0; position: relative; }
 .chip img, .skill-icon { width: 15px; height: 15px; object-fit: contain; }
 .about-cards { display: flex; flex-direction: column; gap: 20px; }
 .about-card {
-  background: var(--surface); border: 1px solid var(--border);
+  background: var(--glass); border: 1px solid rgba(147,197,253,.14);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
   border-radius: 16px; padding: 28px 30px;
   transition: all 0.3s;
 }
@@ -368,7 +473,8 @@ section { padding: 120px 0; position: relative; }
 #certs { background: var(--surface2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
 .certs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
 .cert-card {
-  background: var(--surface); border: 1px solid var(--border);
+  background: var(--glass); border: 1px solid rgba(147,197,253,.14);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
   border-radius: 16px; padding: 26px;
   display: flex; gap: 18px; align-items: flex-start;
   transition: all 0.3s; color: inherit;
@@ -402,12 +508,14 @@ section { padding: 120px 0; position: relative; }
 /* ── PROJECTS ── */
 .projects-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 .proj {
-  background: var(--surface); border: 1px solid var(--border);
+  background: var(--glass); border: 1px solid rgba(147,197,253,.14);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
   border-radius: 16px; padding: 32px;
   transition: all 0.3s;
   display: flex; flex-direction: column;
 }
 .proj:hover { border-color: var(--accent); transform: translateY(-4px); box-shadow: var(--shadow); }
+.about-card, .cert-card, .proj, .photo-container { transform-style: preserve-3d; will-change: transform; }
 .proj-featured { grid-column: span 2; display: grid; grid-template-columns: 1fr 1fr; padding: 0; overflow: hidden; }
 .proj-featured .proj-content { padding: 36px; display: flex; flex-direction: column; }
 .proj-featured .proj-visual {
@@ -521,81 +629,6 @@ section { padding: 120px 0; position: relative; }
 .back-to-top.visible { opacity: 1; visibility: visible; transform: translateY(0); }
 .back-to-top:hover { border-color: var(--accent); }
 
-/* ── CHATBOT ── */
-.chatbot-btn {
-  position: fixed;
-  bottom: calc(28px + env(safe-area-inset-bottom, 0px));
-  left: calc(28px + env(safe-area-inset-left, 0px));
-  z-index: 990;
-  width: 48px; height: 48px; border-radius: 50%;
-  border: 1px solid var(--border); background: var(--surface);
-  font-size: 20px; cursor: pointer; transition: all 0.3s; box-shadow: var(--shadow);
-}
-.chatbot-btn:hover { border-color: var(--accent); transform: scale(1.08); }
-.chatbot-window {
-  position: fixed;
-  bottom: calc(90px + env(safe-area-inset-bottom, 0px));
-  left: calc(28px + env(safe-area-inset-left, 0px));
-  z-index: 990;
-  width: 360px; max-height: calc(480px + env(safe-area-inset-bottom, 0px));
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 18px; overflow: hidden;
-  box-shadow: var(--shadow-lift);
-  display: flex; flex-direction: column;
-  transform: translateY(16px) scale(0.96); opacity: 0; visibility: hidden;
-  transition: all 0.3s;
-}
-.chatbot-window.open { transform: none; opacity: 1; visibility: visible; }
-.chatbot-header {
-  padding: 14px 18px; border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; gap: 12px;
-}
-.chatbot-avatar {
-  width: 34px; height: 34px; border-radius: 50%;
-  background: var(--accent-soft); color: var(--accent);
-  display: flex; align-items: center; justify-content: center; font-size: 16px;
-}
-.chatbot-info { flex: 1; }
-.chatbot-name { font-weight: 700; font-size: 13.5px; }
-.chatbot-status { font-family: var(--font-mono); font-size: 10px; color: #10b981; letter-spacing: 1px; }
-.chatbot-close { background: none; border: none; color: var(--muted); font-size: 17px; cursor: pointer; }
-.chatbot-close:hover { color: var(--text); }
-.chatbot-messages {
-  flex: 1; overflow-y: auto; padding: 16px;
-  display: flex; flex-direction: column; gap: 10px; max-height: 320px;
-}
-.chatbot-messages::-webkit-scrollbar { width: 4px; }
-.chatbot-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-.chat-msg {
-  max-width: 85%; padding: 11px 15px; border-radius: 12px;
-  font-size: 13px; line-height: 1.55; animation: msgIn 0.25s ease;
-}
-@keyframes msgIn { from { opacity: 0; transform: translateY(6px); } }
-.chat-msg.bot { align-self: flex-start; background: var(--surface2); border: 1px solid var(--border); }
-.chat-msg.user { align-self: flex-end; background: var(--accent); color: #fff; border-bottom-right-radius: 4px; }
-.chat-msg .typing-dots span {
-  display: inline-block; width: 6px; height: 6px; border-radius: 50%;
-  background: var(--muted); margin: 0 2px; animation: dotBounce 1.4s ease-in-out infinite;
-}
-.chat-msg .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
-.chat-msg .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
-@keyframes dotBounce { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-5px); } }
-.chatbot-input-area { padding: 12px 16px; border-top: 1px solid var(--border); display: flex; gap: 8px; }
-.chatbot-input {
-  flex: 1; background: var(--surface2); border: 1px solid var(--border);
-  border-radius: 10px; padding: 10px 14px; color: var(--text);
-  font-family: var(--font-body); font-size: 13px; outline: none;
-  transition: border-color 0.25s;
-}
-.chatbot-input:focus { border-color: var(--accent); }
-.chatbot-input::placeholder { color: var(--muted); }
-.chatbot-send {
-  width: 38px; height: 38px; border-radius: 10px; border: none;
-  background: var(--accent); color: #fff; font-size: 15px; cursor: pointer;
-  transition: all 0.25s;
-}
-.chatbot-send:hover { opacity: 0.85; }
-
 /* ── KONAMI ── */
 .konami-overlay {
   position: fixed; inset: 0; z-index: 99998;
@@ -619,6 +652,45 @@ section { padding: 120px 0; position: relative; }
 .d1 { transition-delay: 0.05s; } .d2 { transition-delay: 0.1s; } .d3 { transition-delay: 0.15s; }
 .d4 { transition-delay: 0.2s; } .d5 { transition-delay: 0.25s; } .d6 { transition-delay: 0.3s; }
 
+/* ── RIGHT RAIL ── */
+.right-rail {
+  position: fixed;
+  right: calc(34px + env(safe-area-inset-right, 0px));
+  bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+  z-index: 900;
+  display: flex; flex-direction: column; align-items: center; gap: 18px;
+}
+.rail-clock {
+  writing-mode: vertical-rl;
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: 2px;
+  color: var(--muted);
+  display: flex; align-items: center; gap: 8px;
+}
+.rail-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: #10b981;
+  animation: railPulse 2s ease-in-out infinite;
+}
+@keyframes railPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.5); }
+  50% { box-shadow: 0 0 0 6px rgba(16,185,129,0); }
+}
+.rail-city { opacity: 0.7; }
+.rail-email {
+  font-family: var(--font-mono); font-size: 12px; letter-spacing: 2.5px;
+  color: var(--muted);
+  writing-mode: vertical-rl;
+  transition: all 0.3s;
+}
+.rail-email:hover { color: var(--accent); transform: translateY(-4px); }
+.rail-line { width: 1px; height: 120px; background: var(--border-strong); position: relative; overflow: hidden; }
+.rail-line::after {
+  content: ''; position: absolute; top: -100%; left: 0;
+  width: 100%; height: 100%;
+  background: var(--accent);
+  animation: railSlide 3s ease-in-out infinite;
+}
+@keyframes railSlide { 0% { top: -100%; } 50%, 100% { top: 100%; } }
+
 /* ── RESPONSIVE ── */
 
 /* tablets & large phones */
@@ -638,6 +710,7 @@ section { padding: 120px 0; position: relative; }
   }
   .banner-hidden .mobile-nav { top: calc(60px + env(safe-area-inset-top, 0px)); }
   .nav-right { gap: 12px; }
+  .right-rail { display: none; }
   .nav-logo { font-size: 17px; }
 
   .hero-grid { grid-template-columns: 1fr; gap: 48px; }
@@ -651,8 +724,10 @@ section { padding: 120px 0; position: relative; }
     height: auto;
     aspect-ratio: 300 / 380;
   }
+  .photo-orbit { display: none; }
+  .hero-scroll-cue { display: none; }
+  .lab-layout { grid-template-columns: 1fr; }
   .photo-tag { right: -6px; top: 12px; }
-  .views-badge { right: -10px; }
 
   .about-grid { grid-template-columns: 1fr; gap: 40px; }
   .skills-layout { grid-template-columns: 1fr; gap: 40px; }
@@ -666,12 +741,6 @@ section { padding: 120px 0; position: relative; }
   .status-banner {
     font-size: 10px; padding: 0 44px; text-align: center; line-height: 1.3;
   }
-  .chatbot-window {
-    left: 12px; right: 12px; width: auto;
-    bottom: calc(80px + env(safe-area-inset-bottom, 0px));
-    max-height: 70svh;
-  }
-  .chatbot-btn { left: 16px; }
   .back-to-top {
     right: 16px;
     bottom: calc(20px + env(safe-area-inset-bottom, 0px));
@@ -705,11 +774,7 @@ section { padding: 120px 0; position: relative; }
   .photo-badge { left: 8px; bottom: 10px; padding: 8px 12px; }
   .photo-badge .badge-text { font-size: 10px; }
   .photo-tag { font-size: 10px; padding: 6px 10px; }
-  .views-badge { padding: 6px 10px; right: -6px; }
 
-  /* prevent iOS zoom on input focus */
-  .chatbot-input { font-size: 16px; }
-  .chatbot-close { padding: 10px; }
 }
 
 /* small phones (iPhone SE / old Androids) */
@@ -731,11 +796,28 @@ section { padding: 120px 0; position: relative; }
 </head>
 <body>
 
-<!-- 3D BACKGROUND -->
-<canvas id="three-bg"></canvas>
+<div id="pageLoader" aria-hidden="true">
+  <div class="loader-mark"><span class="loader-ring"></span><span class="loader-ring"></span><span class="loader-name">TK</span></div>
+</div>
+<script>setTimeout(function(){var loader=document.getElementById('pageLoader');if(loader)loader.classList.add('done');},1800);</script>
+
+<!-- 3D JOURNEY -->
+<canvas id="journey" aria-hidden="true"></canvas>
+<div class="journey-hud" id="journeyHud" aria-hidden="true"><span class="hud-idx">01 / 09</span><span class="hud-name">CORE</span></div>
 
 <!-- SCROLL PROGRESS -->
 <div class="scroll-progress" id="scrollProgress"></div>
+
+<!-- RIGHT RAIL -->
+<aside class="right-rail">
+  <div class="rail-clock">
+    <span class="rail-dot"></span>
+    <span id="railTime">--:--</span>
+    <span class="rail-city">BISHKEK</span>
+  </div>
+  <a href="mailto:thekubanych@gmail.com" class="rail-email">thekubanych@gmail.com</a>
+  <div class="rail-line"></div>
+</aside>
 
 <!-- STATUS BANNER -->
 <div class="status-banner" id="statusBanner">
@@ -840,11 +922,35 @@ section { padding: 120px 0; position: relative; }
             <div class="badge-text" data-i18n="badge_open">Открыт к работе</div>
           </div>
           <div class="photo-tag">@1.muxtarow</div>
-          <div class="views-badge" id="viewsBadge" style="display:none">
-            <div class="views-num" id="viewsNum">0</div>
-            <div data-i18n="badge_views">👁 просмотров</div>
-          </div>
+          <div class="photo-orbit one"></div>
+          <div class="photo-orbit two"></div>
         </div>
+      </div>
+    </div>
+    <div class="hero-scroll-cue">SCROLL TO EXPLORE</div>
+  </div>
+</section>
+
+<!-- CODE LAB -->
+<section id="lab" class="lab-section">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="section-num">✦ <span>INTERACTIVE LAB</span></div>
+      <h2 class="section-title">Поиграй с <em>терминалом</em></h2>
+    </div>
+    <div class="lab-layout">
+      <div class="terminal-window reveal d1">
+        <div class="terminal-bar"><span class="terminal-dot"></span><span class="terminal-dot"></span><span class="terminal-dot"></span><span class="terminal-title">kubanych@portfolio — zsh</span></div>
+        <div class="terminal-output" id="terminalOutput">
+          <div><span class="term-green">✓</span> connection established</div>
+          <div><span class="term-muted">type</span> <span class="term-accent">help</span> <span class="term-muted">to see available commands</span></div>
+        </div>
+        <form class="terminal-form" id="terminalForm"><span>guest@kubanych:~$</span><input id="terminalInput" autocomplete="off" spellcheck="false" aria-label="Terminal command"></form>
+      </div>
+      <div class="lab-copy reveal d2">
+        <h3>Код — это способ превращать идеи в работающие системы.</h3>
+        <p>Попробуй команды в терминале. Здесь живут мои навыки, стек и немного характера.</p>
+        <div class="lab-metrics"><div class="lab-metric"><strong>24/7</strong><span>CURIOUS</span></div><div class="lab-metric"><strong>API</strong><span>BUILDER</span></div><div class="lab-metric"><strong>∞</strong><span>LEARNING</span></div></div>
       </div>
     </div>
   </div>
@@ -1182,27 +1288,8 @@ section { padding: 120px 0; position: relative; }
   <button class="konami-close" onclick="document.getElementById('konamiOverlay').classList.remove('active')">CLOSE</button>
 </div>
 
-<!-- CHATBOT -->
-<button class="chatbot-btn" id="chatBtn" title="Поговори со мной">🤖</button>
-<div class="chatbot-window" id="chatWindow">
-  <div class="chatbot-header">
-    <div class="chatbot-avatar">🤖</div>
-    <div class="chatbot-info">
-      <div class="chatbot-name">TheKubanych Bot</div>
-      <div class="chatbot-status">● ONLINE</div>
-    </div>
-    <button class="chatbot-close" id="chatClose">✕</button>
-  </div>
-  <div class="chatbot-messages" id="chatMessages">
-    <div class="chat-msg bot">Йо! Я бот TheKubanych. Задавай вопрос, только не будь скучным 🙄</div>
-  </div>
-  <div class="chatbot-input-area">
-    <input class="chatbot-input" id="chatInput" placeholder="Напиши что-нибудь..." autocomplete="off">
-    <button class="chatbot-send" id="chatSend">➤</button>
-  </div>
-</div>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="/static/js/journey.js" defer></script>
 <script>
 // ── THEME ──
 const html = document.documentElement;
@@ -1323,6 +1410,7 @@ async function loadProjects(){
         ${p.is_featured?'</div><div class="proj-visual">⚙️</div>':''}
       </div>`).join('');
     grid.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+    setupCardTilt(grid);
   }catch(e){}
 }
 
@@ -1346,6 +1434,7 @@ async function loadExperience(){
         </div>
       </div>`).join('');
     container.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+    setupCardTilt(container);
   }catch(e){
     document.getElementById('expTimeline').innerHTML = '<div class="exp-placeholder">Не удалось загрузить</div>';
   }
@@ -1363,19 +1452,6 @@ function setupCvButtons(){
       }catch{ alert('Не удалось загрузить CV'); }
     });
   });
-}
-
-async function loadStats(){
-  try{
-    const res = await fetch(`${API_URL}/stats/`);
-    if(!res.ok) return;
-    const data = await res.json();
-    if(data.total_views > 0){
-      const badge = document.getElementById('viewsBadge');
-      const num = document.getElementById('viewsNum');
-      if(badge && num){ badge.style.display = 'flex'; num.textContent = data.total_views.toLocaleString(); }
-    }
-  }catch(e){}
 }
 
 // ── MOBILE MENU ──
@@ -1473,7 +1549,7 @@ const TRANSLATIONS = {
     hero_desc:'Строю серверную часть веб-приложений. Python, API, базы данных — это моё. Студент SoftJol, который пишет код каждый день.',
     stat_year:'SoftJol', stat_projects:'Проекта', stat_potential:'Потенциал',
     btn_contact:'Написать мне', btn_projects:'Проекты', btn_cv:'Скачать CV',
-    social_find:'НАЙТИ', badge_open:'Открыт к работе', badge_views:'👁 просмотров',
+    social_find:'НАЙТИ', badge_open:'Открыт к работе',
     about_tag:'ОБО МНЕ', about_title_1:'Привет, я',
     about_p1:'Увлечён разработкой бэкенда — строю надёжные API, проектирую базы данных и разворачиваю приложения в продакшн. Каждый день пишу код и стараюсь делать сложные вещи простыми.',
     about_p2:'Учусь в SoftJol — каждый день пишу код и практикуюсь на реальных задачах. Открыт к стажировкам и pet-проектам — готов работать в команде и учиться у опытных разработчиков.',
@@ -1511,7 +1587,7 @@ const TRANSLATIONS = {
     hero_desc:"I build the server side of web applications. Python, APIs, databases — that's my thing. A SoftJol student writing code every day.",
     stat_year:'SoftJol', stat_projects:'Projects', stat_potential:'Potential',
     btn_contact:'Contact me', btn_projects:'Projects', btn_cv:'Download CV',
-    social_find:'FIND ME', badge_open:'Open to work', badge_views:'👁 views',
+    social_find:'FIND ME', badge_open:'Open to work',
     about_tag:'ABOUT ME', about_title_1:"Hi, I'm",
     about_p1:"I'm passionate about backend development — building reliable APIs, designing databases, and deploying apps to production. I write code every day and love turning complex problems into simple solutions.",
     about_p2:"I'm studying at SoftJol — writing code and practicing on real tasks every day. Open to internships and side projects — ready to work in a team and learn from experienced developers.",
@@ -1560,236 +1636,104 @@ function setLang(lang){
 }
 setLang(currentLang);
 
-// ── CHATBOT ──
-let evilMode = false;
-const chatBtn = document.getElementById('chatBtn');
-const chatWindow = document.getElementById('chatWindow');
-const chatClose = document.getElementById('chatClose');
-const chatMessages = document.getElementById('chatMessages');
-const chatInput = document.getElementById('chatInput');
-const chatSend = document.getElementById('chatSend');
-
-chatBtn.addEventListener('click', () => {
-  chatWindow.classList.toggle('open');
-  if(chatWindow.classList.contains('open')) chatInput.focus();
-});
-chatClose.addEventListener('click', () => chatWindow.classList.remove('open'));
-
-function addBotTyping(){
-  const div = document.createElement('div');
-  div.className = 'chat-msg bot';
-  div.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
-  chatMessages.appendChild(div);
-  chatMessages.scrollTop = chatMessages.scrollHeight;
-  return div;
-}
-function addMsg(text, sender){
-  const div = document.createElement('div');
-  div.className = 'chat-msg ' + sender;
-  div.textContent = text;
-  chatMessages.appendChild(div);
-  chatMessages.scrollTop = chatMessages.scrollHeight;
-}
-function handleChat(){
-  const text = chatInput.value.trim();
-  if(!text) return;
-  addMsg(text, 'user');
-  chatInput.value = '';
-  const typing = addBotTyping();
-  const mode = evilMode ? 'evil' : 'normal';
-  if(text.toLowerCase() === 'evil_mode/'){
-    evilMode = true;
-    setTimeout(() => {
-      typing.remove();
-      addMsg('😈 EVIL MODE ВКЛЮЧЁН. Теперь я грубый. Попробуй написать "привет".', 'bot');
-      document.querySelector('.chatbot-avatar').textContent = '😈';
-      document.querySelector('.chatbot-avatar').style.background = '#fee2e2';
-      document.querySelector('.chatbot-avatar').style.color = '#ef4444';
-      document.querySelector('.chatbot-name').textContent = 'TheKubanych EVIL BOT';
-      document.querySelector('.chatbot-status').textContent = '● EVIL MODE';
-      document.querySelector('.chatbot-status').style.color = '#ef4444';
-    }, 800);
-    return;
-  }
-  if(text.toLowerCase() === 'normal_mode/'){
-    evilMode = false;
-    setTimeout(() => {
-      typing.remove();
-      addMsg('😇 Normal mode. Я снова добрый.', 'bot');
-      document.querySelector('.chatbot-avatar').textContent = '🤖';
-      document.querySelector('.chatbot-avatar').style.background = '';
-      document.querySelector('.chatbot-avatar').style.color = '';
-      document.querySelector('.chatbot-name').textContent = 'TheKubanych Bot';
-      document.querySelector('.chatbot-status').textContent = '● ONLINE';
-      document.querySelector('.chatbot-status').style.color = '#10b981';
-    }, 800);
-    return;
-  }
-  fetch('/api/chat/', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ message: text, mode: mode })
-  })
-  .then(r => r.json())
-  .then(data => {
-    typing.remove();
-    addMsg(data.reply || 'Что-то пошло не так...', 'bot');
-  })
-  .catch(() => {
-    typing.remove();
-    addMsg('Сервер упал. Попробуй позже. 🤷', 'bot');
-  });
-}
-chatSend.addEventListener('click', handleChat);
-chatInput.addEventListener('keydown', e => { if(e.key === 'Enter') handleChat(); });
-
-// ── THREE.JS 3D BACKGROUND ──
-(function initThree(){
-  const canvas = document.getElementById('three-bg');
-  if(!canvas || typeof THREE === 'undefined') return;
-  let renderer;
+// ── RIGHT RAIL CLOCK ──
+const railTime = document.getElementById('railTime');
+function updateRailTime(){
+  if(!railTime) return;
   try{
-    renderer = new THREE.WebGLRenderer({ canvas, alpha:true, antialias:true });
-  }catch(e){ canvas.remove(); return; }
-
-  const isMobile = window.innerWidth < 768;
-  const dpr = Math.min(window.devicePixelRatio || 1, isMobile ? 1.5 : 2);
-  renderer.setPixelRatio(dpr);
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setClearColor(0x000000, 0);
-
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
-  camera.position.z = 14;
-
-  const isDark = () => document.documentElement.getAttribute('data-theme') !== 'light';
-  const accentColor = () => isDark() ? '#3b82f6' : '#3b82f6';
-
-  scene.add(new THREE.AmbientLight(0xffffff, 0.8));
-  const dir = new THREE.DirectionalLight(0xffffff, 0.5);
-  dir.position.set(5, 5, 8);
-  scene.add(dir);
-
-  // central wireframe icosahedron (right side, behind photo)
-  const ico = new THREE.Mesh(
-    new THREE.IcosahedronGeometry(3, 1),
-    new THREE.MeshStandardMaterial({ color: accentColor(), wireframe:true, transparent:true, opacity:0.4, metalness:0.3, roughness:0.4 })
-  );
-  ico.position.set(3.4, 0.2, -2);
-  scene.add(ico);
-
-  // orbit ring
-  const ring = new THREE.Mesh(
-    new THREE.TorusGeometry(4.4, 0.02, 12, 120),
-    new THREE.MeshBasicMaterial({ color: accentColor(), transparent:true, opacity:0.25 })
-  );
-  ring.position.copy(ico.position);
-  ring.rotation.x = Math.PI / 2.2;
-  scene.add(ring);
-
-  // particle network (API nodes)
-  const COUNT = isMobile ? 60 : 130;
-  const pos = new Float32Array(COUNT * 3);
-  const spd = [];
-  for(let i = 0; i < COUNT; i++){
-    pos[i*3]   = (Math.random() - 0.5) * 26;
-    pos[i*3+1] = (Math.random() - 0.5) * 16;
-    pos[i*3+2] = (Math.random() - 0.5) * 14;
-    spd.push((Math.random()-0.5)*0.006, (Math.random()-0.5)*0.006, (Math.random()-0.5)*0.006);
+    railTime.textContent = new Intl.DateTimeFormat('ru-RU', {
+      hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Bishkek'
+    }).format(new Date());
+  }catch(e){
+    railTime.textContent = new Date().toTimeString().slice(0,5);
   }
-  const pGeo = new THREE.BufferGeometry();
-  pGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-  const points = new THREE.Points(pGeo, new THREE.PointsMaterial({
-    color: accentColor(), size: 0.11, transparent:true, opacity: 0.55, sizeAttenuation: true
-  }));
-  scene.add(points);
+}
+updateRailTime();
+setInterval(updateRailTime, 1000);
 
-  // connecting lines
-  const lineArr = [];
-  const MAX_D = 4.2;
-  for(let i = 0; i < COUNT; i++){
-    for(let j = i+1; j < COUNT; j++){
-      const dx = pos[i*3]-pos[j*3], dy = pos[i*3+1]-pos[j*3+1], dz = pos[i*3+2]-pos[j*3+2];
-      if(Math.hypot(dx, dy, dz) < MAX_D){
-        lineArr.push(pos[i*3], pos[i*3+1], pos[i*3+2], pos[j*3], pos[j*3+1], pos[j*3+2]);
-      }
-    }
-  }
-  const lineGeo = new THREE.BufferGeometry();
-  lineGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(lineArr), 3));
-  const lines = new THREE.LineSegments(lineGeo, new THREE.LineBasicMaterial({
-    color: accentColor(), transparent:true, opacity: 0.15
-  }));
-  scene.add(lines);
-
-  // mouse parallax
-  let mx = 0, my = 0;
-  window.addEventListener('mousemove', e => {
-    mx = (e.clientX / window.innerWidth  - 0.5) * 2;
-    my = (e.clientY / window.innerHeight - 0.5) * 2;
+// ── CARD DEPTH ──
+function setupCardTilt(root = document){
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
+     window.matchMedia('(pointer: coarse)').matches) return;
+  root.querySelectorAll('.about-card, .cert-card, .proj, .photo-container').forEach(card => {
+    if(card.dataset.tiltBound) return;
+    card.dataset.tiltBound = '1';
+    card.addEventListener('pointermove', e => {
+      const rect = card.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width - 0.5;
+      const y = (e.clientY - rect.top) / rect.height - 0.5;
+      card.style.transform = `perspective(900px) rotateX(${(-y * 5).toFixed(2)}deg) rotateY(${(x * 7).toFixed(2)}deg) translateY(-4px)`;
+    });
+    card.addEventListener('pointerleave', () => {
+      card.style.transform = '';
+    });
   });
+}
 
-  // pause when hero not visible
-  let active = true;
-  const heroEl = document.getElementById('hero');
-  if(heroEl && 'IntersectionObserver' in window){
-    new IntersectionObserver(es => {
-      es.forEach(e => { active = e.isIntersecting; });
-    }, { threshold: 0 }).observe(heroEl);
-  }
-
-  function applyThemeColors(){
-    const c = accentColor();
-    ico.material.color.set(c);
-    ring.material.color.set(c);
-    points.material.color.set(c);
-    lines.material.color.set(c);
-  }
-
-  const clock = new THREE.Clock();
-  function tick(){
-    requestAnimationFrame(tick);
-    if(!active || document.hidden) return;
-    const t = clock.getElapsedTime();
-
-    // drift particles
-    const arr = pGeo.attributes.position.array;
-    for(let i = 0; i < COUNT; i++){
-      arr[i*3]   += spd[i*3];
-      arr[i*3+1] += spd[i*3+1];
-      arr[i*3+2] += spd[i*3+2];
-      if(arr[i*3]   >  13) arr[i*3]   = -13;
-      if(arr[i*3]   < -13) arr[i*3]   =  13;
-      if(arr[i*3+1] >   8) arr[i*3+1] =  -8;
-      if(arr[i*3+1] <  -8) arr[i*3+1] =   8;
-    }
-    pGeo.attributes.position.needsUpdate = true;
-
-    ico.rotation.x = t * 0.25;
-    ico.rotation.y = t * 0.35;
-    ring.rotation.z = t * 0.2;
-    camera.position.x += (mx * 3 - camera.position.x) * 0.04;
-    camera.position.y += (-my * 2 - camera.position.y) * 0.04;
-    camera.lookAt(0, 0, 0);
-
-    renderer.render(scene, camera);
-  }
-  tick();
-
-  window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
+function setupMagneticButtons(){
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
+     window.matchMedia('(pointer: coarse)').matches) return;
+  document.querySelectorAll('.hero-actions .btn, .contact-actions .btn').forEach(button => {
+    if(button.dataset.magneticBound) return;
+    button.dataset.magneticBound = '1';
+    button.addEventListener('pointermove', e => {
+      const rect = button.getBoundingClientRect();
+      const x = (e.clientX - rect.left - rect.width / 2) * 0.12;
+      const y = (e.clientY - rect.top - rect.height / 2) * 0.18;
+      button.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
+    });
+    button.addEventListener('pointerleave', () => { button.style.transform = ''; });
   });
-  themeToggle.addEventListener('click', applyThemeColors);
+}
+
+// ── LOADER + INTERACTIVE TERMINAL ──
+window.addEventListener('load', () => {
+  setTimeout(() => document.getElementById('pageLoader')?.classList.add('done'), 260);
+});
+setTimeout(() => document.getElementById('pageLoader')?.classList.add('done'), 5000);
+
+(function setupTerminal(){
+  const form = document.getElementById('terminalForm');
+  const input = document.getElementById('terminalInput');
+  const output = document.getElementById('terminalOutput');
+  if(!form || !input || !output) return;
+  const commands = {
+    help: ['Доступные команды:', 'about     — кто я', 'stack     — мой стек', 'projects  — чем занимаюсь', 'contact   — как связаться', 'clear     — очистить терминал'],
+    about: ['TheKubanych — backend developer из Бишкека.', 'Строю API, базы данных и приложения на Python.'],
+    stack: ['Python · Django · FastAPI · PostgreSQL · Docker · Linux · Git'],
+    projects: ['Portfolio API · Telegram bots · автоматизация · pet-проекты'],
+    contact: ['Telegram: @themuhtarovv', 'Email: thekubanych@gmail.com'],
+  };
+  form.addEventListener('submit', event => {
+    event.preventDefault();
+    const command = input.value.trim().toLowerCase();
+    if(!command) return;
+    const line = document.createElement('div');
+    line.innerHTML = `<span class="term-muted">guest@kubanych:~$</span> ${command.replace(/[<>&]/g, '')}`;
+    output.appendChild(line);
+    if(command === 'clear') output.innerHTML = '';
+    else {
+      const response = commands[command] || [`Команда «${command.replace(/[<>&]/g, '')}» не найдена.`, 'Напиши help.'];
+      response.forEach(text => { const row = document.createElement('div'); row.textContent = text; row.className = 'term-accent'; output.appendChild(row); });
+    }
+    input.value = ''; output.scrollTop = output.scrollHeight;
+  });
 })();
+
+if(!window.matchMedia('(pointer: coarse)').matches){
+  window.addEventListener('pointermove', e => {
+    document.documentElement.style.setProperty('--cursor-x', `${e.clientX}px`);
+    document.documentElement.style.setProperty('--cursor-y', `${e.clientY}px`);
+  }, { passive: true });
+}
 
 // ── INIT ──
 loadSkills();
 loadProjects();
 loadExperience();
 setupCvButtons();
-loadStats();
+setupCardTilt();
+setupMagneticButtons();
 </script>
 </body>
 </html>

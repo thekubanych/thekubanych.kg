@@ -2,6 +2,23 @@ from rest_framework import serializers
 from .models import Skill, Project, ContactMessage, WorkExperience
 
 
+class StrictCharField(serializers.CharField):
+    def to_internal_value(self, data):
+        if not isinstance(data, str):
+            self.fail('invalid')
+        return super().to_internal_value(data)
+
+
+class TelegramAuthSerializer(serializers.Serializer):
+    id = serializers.IntegerField(min_value=1, max_value=2**63 - 1)
+    auth_date = serializers.IntegerField(min_value=1, max_value=2**63 - 1)
+    hash = serializers.RegexField(r'\A[0-9a-f]{64}\Z')
+    first_name = StrictCharField(max_length=100)
+    last_name = StrictCharField(max_length=100, required=False, allow_blank=True)
+    username = StrictCharField(max_length=100, required=False, allow_blank=True)
+    photo_url = serializers.URLField(max_length=200, required=False, allow_blank=True)
+
+
 class SkillSerializer(serializers.ModelSerializer):
     class Meta:
         model = Skill
@@ -20,10 +37,15 @@ class ContactMessageSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(required=False, allow_blank=True, default='')
     # Honeypot — боты заполняют, люди нет
     website = serializers.CharField(required=False, allow_blank=True, write_only=True)
+    telegram_user_id = serializers.IntegerField(
+        min_value=1, max_value=2**63 - 1, required=False, write_only=True
+    )
+    telegram_token = StrictCharField(max_length=1024, required=False, write_only=True)
 
     class Meta:
         model = ContactMessage
-        fields = ['name', 'email', 'subject', 'message', 'website']
+        fields = ['name', 'email', 'subject', 'message', 'website',
+                  'telegram_user_id', 'telegram_token']
 
     def validate_message(self, value):
         if len(value) < 5:

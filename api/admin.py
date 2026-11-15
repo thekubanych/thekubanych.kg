@@ -4,6 +4,7 @@ from .models import Skill, Project, ContactMessage, PageView, WorkExperience, Re
 
 
 @admin.register(Skill)
+
 class SkillAdmin(admin.ModelAdmin):
     list_display = ['icon', 'name', 'bar', 'category', 'order', 'is_active']
     list_editable = ['order', 'is_active']
@@ -82,3 +83,6 @@ class WorkExperienceAdmin(admin.ModelAdmin):
 class ResumeFileAdmin(admin.ModelAdmin):
     list_display = ['file', 'is_active', 'updated_at']
     list_editable = ['is_active']
+
+
+

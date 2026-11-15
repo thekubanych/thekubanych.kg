@@ -10,5 +10,4 @@ urlpatterns = [
     path('contact/', views.contact_send),
     path('stats/', views.page_views_stats),
     path('auth/telegram/', views.telegram_auth),
-    path('chat/', views.chatbot_reply),
 ]

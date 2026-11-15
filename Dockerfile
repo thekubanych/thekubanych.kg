@@ -1,6 +1,7 @@
 FROM python:3.11-slim
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
+ENV DATA_DIR=/data
 
 WORKDIR /app
 
@@ -12,9 +13,8 @@ RUN pip install --no-cache-dir -r /app/requirements.txt
 
 COPY . /app
 
-RUN python manage.py collectstatic --noinput || true
-RUN python manage.py migrate --noinput
-RUN python manage.py seed_data
-RUN python manage.py create_admin
+RUN mkdir -p /data
+VOLUME ["/data"]
 
+ENTRYPOINT ["sh", "/app/deploy/entrypoint.sh"]
 CMD ["gunicorn", "portfolio.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "2"]

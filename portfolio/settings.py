@@ -1,13 +1,18 @@
 from pathlib import Path
 from decouple import config
+from django.core.exceptions import ImproperlyConfigured
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = config("SECRET_KEY", default="django-insecure-change-me")
 DEBUG = config("DEBUG", default=True, cast=bool)
+if not DEBUG and (len(SECRET_KEY) < 50 or SECRET_KEY.startswith("django-insecure-")):
+    raise ImproperlyConfigured("Set a random SECRET_KEY of at least 50 characters for production.")
 
-
-
+DATA_DIR = Path(config("DATA_DIR", default=str(BASE_DIR)))
+TRUSTED_PROXY_IPS = [
+    value.strip() for value in config("TRUSTED_PROXY_IPS", default="").split(",") if value.strip()
+]
 
 ALLOWED_HOSTS = ["127.0.0.1", "localhost", "0.0.0.0"]
 CSRF_TRUSTED_ORIGINS = []
@@ -76,18 +81,21 @@ TEMPLATES = [
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "NAME": DATA_DIR / "db.sqlite3",
     }
 }
 
 
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
+}
 STATICFILES_DIRS = [BASE_DIR / "static"] if (BASE_DIR / "static").exists() else []
 
 MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_ROOT = DATA_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
@@ -96,6 +104,13 @@ CORS_ALLOW_ALL_ORIGINS = True
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.AllowAny"],
 }
+
+AUTH_PASSWORD_VALIDATORS = [
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator", "OPTIONS": {"min_length": 12}},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
+]
 
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
@@ -109,8 +124,6 @@ CONTACT_EMAIL = config("CONTACT_EMAIL", default="")
 
 TELEGRAM_BOT_TOKEN = config("TELEGRAM_BOT_TOKEN", default="")
 TELEGRAM_CHAT_ID = config("TELEGRAM_CHAT_ID", default="")
-
-OPENAI_API_KEY = config("OPENAI_API_KEY", default="")
 
 # Sentry (error monitoring) — init only when DSN provided
 SENTRY_DSN = config("SENTRY_DSN", default="")
@@ -144,14 +157,7 @@ if not DEBUG:
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
 
-# Кеш для rate limiting (форма контакта)
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-    }
-}
-
-# Контакт: макс 3 отправки с одного IP за 10 минут
+# Контакт: общий для всех процессов лимит на фиксированное окно 10 минут.
 CONTACT_RATE_LIMIT = 3
 CONTACT_RATE_WINDOW = 600  # секунд
 
@@ -159,5 +165,3 @@ LANGUAGE_CODE = "ru-ru"
 TIME_ZONE = "Asia/Bishkek"
 USE_I18N = True
 USE_TZ = True
-
-
