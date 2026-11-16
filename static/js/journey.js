@@ -332,6 +332,7 @@
   }
 
   // ── stations ──
+  var skillBadges = [];
   var stations = [];
   function station(i, build) {
     var g = new THREE.Group();
@@ -428,6 +429,33 @@
     var nucleus = new THREE.Mesh(new THREE.IcosahedronGeometry(0.8, 16), nucMat);
     g.add(nucleus);
     var spinners = [];
+    var ICONS = 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/';
+    var SKILLS = [
+      ['Python', 'python/python-original', 75], ['FastAPI', 'fastapi/fastapi-original', 65], ['Django', 'django/django-plain', null],
+      ['PostgreSQL', 'postgresql/postgresql-original', 60], ['SQLite', 'sqlite/sqlite-original', null], ['Docker', 'docker/docker-original', null],
+      ['Git', 'git/git-original', 70], ['Linux', 'linux/linux-original', 55], ['REST API', null, 65]
+    ];
+    // a round chip with the technology logo; falls back to the plain crystal if the logo cannot load
+    function chip(skill, ringColor, onReady) {
+      var c = document.createElement('canvas'); c.width = c.height = 160;
+      var x = c.getContext('2d');
+      function plate() {
+        x.beginPath(); x.arc(80, 80, 72, 0, Math.PI * 2); x.fillStyle = '#0f1933'; x.fill();
+        x.lineWidth = 6; x.strokeStyle = '#' + new THREE.Color(ringColor).getHexString(); x.stroke();
+        x.beginPath(); x.arc(80, 80, 55, 0, Math.PI * 2); x.fillStyle = '#dfe6f5'; x.fill();
+      }
+      if (!skill[1]) {
+        plate();
+        x.fillStyle = '#1e3a8a'; x.font = '700 38px JetBrains Mono, monospace'; x.textAlign = 'center'; x.textBaseline = 'middle';
+        x.fillText('API', 80, 84);
+        onReady(new THREE.CanvasTexture(c));
+        return;
+      }
+      var img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = function () { try { plate(); x.drawImage(img, 44, 44, 72, 72); onReady(new THREE.CanvasTexture(c)); } catch (e) {} };
+      img.src = ICONS + skill[1] + '.svg';
+    }
     var tilt = [[1.2, 0, 0], [0.5, 1.0, 0.3], [-0.6, 0.6, 1.0]];
     var colors = [SKY, VIOLET, CYAN];
     for (var k = 0; k < 3; k++) {
@@ -443,6 +471,17 @@
         var nh = halo(colors[k], 0.9, 0.7);
         nh.position.copy(node.position);
         spin.add(node, nh);
+        (function (node, skill, at) {
+          chip(skill, colors[k], function (texture) {
+            var badge = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, color: 0xb4b4b4, transparent: true, depthWrite: false }));
+            badge.position.copy(at);
+            badge.scale.set(0.74, 0.74, 1);
+            badge.userData.skill = skill;
+            node.parent.add(badge);
+            node.visible = false;
+            skillBadges.push(badge);
+          });
+        })(node, SKILLS[k * 3 + j], node.position.clone());
       }
       orbit.add(spin);
       g.add(orbit);
@@ -551,10 +590,24 @@
       mesh.setColorAt(k, col.setHex(levels[lv]));
     }
     mesh.instanceColor.needsUpdate = true;
+    function setDays(days) {
+      for (var k = 0; k < COUNT; k++) {
+        var n = days[(k % COLS) * ROWS + ((k / COLS) | 0)] || 0;        // column = week, row = day
+        var lv = n >= 10 ? 4 : n >= 6 ? 3 : n >= 3 ? 2 : n >= 1 ? 1 : 0;
+        base[k] = 0.14 + lv * 0.42;
+        mesh.setColorAt(k, col.setHex(levels[lv]));
+      }
+      mesh.instanceColor.needsUpdate = true;
+    }
+    if (window.__ghDays) setDays(window.__ghDays);
+    window.addEventListener('gh-activity', function (e) { setDays(e.detail.days); });
+    var grow = 1;
     function layout(t) {
       for (var k = 0; k < COUNT; k++) {
         var cx = k % COLS, cz = (k / COLS) | 0;
-        var h = base[k] * (1 + Math.sin(t * 1.4 + cx * 0.5 + cz * 0.8) * 0.18);
+        // columns rise in a wave from one corner as the camera arrives
+        var rise = Math.min(1, Math.max(0.02, grow * 2.2 - (cx + cz) / (COLS + ROWS) * 1.2));
+        var h = base[k] * rise * (1 + Math.sin(t * 1.4 + cx * 0.5 + cz * 0.8) * 0.18);
         dummy.position.set((cx - (COLS - 1) / 2) * 0.46, h / 2 - 1, (cz - (ROWS - 1) / 2) * 0.46);
         dummy.scale.set(1, h, 1);
         dummy.updateMatrix();
@@ -569,7 +622,8 @@
     board.add(mesh, plate);
     board.rotation.set(0.55, -0.6, 0);
     g.add(board);
-    return function (t) {
+    return function (t, arrive) {
+      grow = arrive;
       layout(t);
       board.rotation.y = -0.6 + Math.sin(t * 0.3) * 0.25;
     };
@@ -689,9 +743,29 @@
   var hudIdx = hud && hud.querySelector('.hud-idx');
   var hudName = hud && hud.querySelector('.hud-name');
   var lastStation = -1;
+  // arrival shockwave
+  var shock = new THREE.Mesh(new THREE.TorusGeometry(1, 0.014, 8, 96), glowMat(SKY, 0.8));
+  shock.visible = false;
+  scene.add(shock);
+  var shockAt = -1;
+  function updateShock(t) {
+    if (shockAt < 0) return;
+    var f = (t - shockAt) / 1.0;
+    if (f >= 1) { shock.visible = false; shockAt = -1; return; }
+    shock.visible = true;
+    shock.lookAt(camera.position);
+    shock.scale.setScalar(1.5 + f * 7);
+    shock.material.opacity = (1 - f) * (1 - f) * 0.8 * themeGain;
+  }
   function setHud(i) {
-    if (i === lastStation || !hud) return;
+    if (i === lastStation) return;
+    if (lastStation !== -1) {
+      shock.position.copy(STATION[i]);
+      shockAt = clock.elapsedTime;
+      window.dispatchEvent(new CustomEvent('journey-station', { detail: { index: i, name: NAMES[i] } }));
+    }
     lastStation = i;
+    if (!hud) return;
     hudIdx.textContent = (i + 1 < 10 ? '0' : '') + (i + 1) + ' / ' + (N < 10 ? '0' : '') + N;
     hudName.textContent = NAMES[i];
   }
@@ -702,11 +776,39 @@
     window.addEventListener('pointermove', function (e) {
       mx = (e.clientX / window.innerWidth - 0.5) * 2;
       my = (e.clientY / window.innerHeight - 0.5) * 2;
+      pointerPx = { x: e.clientX, y: e.clientY };
     }, { passive: true });
   }
 
   // ── frame ──
   var u = 0;
+  var journeyState = window.__journey = { speed: 0 };
+
+  // hovering a technology badge shows its name and level
+  var tip = document.createElement('div');
+  tip.className = 'journey-tip';
+  document.body.appendChild(tip);
+  var ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), pointerPx = null, hovered = null;
+  function hoverSkill() {
+    var hit = null;
+    if (pointerPx && Math.abs(u - 3) < 0.3 && skillBadges.length) {
+      ndc.set(pointerPx.x / window.innerWidth * 2 - 1, -(pointerPx.y / window.innerHeight) * 2 + 1);
+      ray.setFromCamera(ndc, camera);
+      var hits = ray.intersectObjects(skillBadges);
+      if (hits.length) hit = hits[0].object;
+    }
+    if (hit !== hovered) {
+      if (hovered) hovered.scale.set(0.74, 0.74, 1);
+      hovered = hit;
+      if (hit) {
+        hit.scale.set(1.05, 1.05, 1);
+        var skill = hit.userData.skill;
+        tip.textContent = skill[0] + (skill[2] ? ' · ' + skill[2] + '%' : '');
+      }
+      tip.classList.toggle('on', !!hit);
+    }
+    if (hit) tip.style.transform = 'translate(' + (pointerPx.x + 16) + 'px,' + (pointerPx.y - 34) + 'px)';
+  }
   var heroName = (!coarse && !reduced) ? document.querySelector('.hero-name') : null;
   if (heroName) heroName.style.transformOrigin = '30% 50%';
   // intro: the camera starts far behind the first station and flies in once the loader is gone
@@ -752,10 +854,14 @@
       var s = stations[i], d = Math.abs(i - u);
       s.group.visible = d < 2.3;
       if (!s.group.visible) continue;
-      s.update(t);
+      // each station spins up and grows as the camera approaches, and folds away behind it
+      var near = Math.max(0, 1 - d / 1.1), arrive = near * near * (3 - 2 * near);
+      s.group.rotation.y = 0;
+      s.update(t, arrive);
+      s.group.rotation.y += (1 - arrive) * 2.8 * (i > u ? 1 : -1);
       s.group.rotation.x = pmy * 0.22;      // lean toward the pointer
       s.group.rotation.z = -pmx * 0.1;
-      s.group.scale.setScalar(0.82 + 0.18 * Math.max(0, 1 - d));
+      s.group.scale.setScalar(0.16 + 0.84 * arrive);
     }
 
     for (var j = 0; j < packets.length; j++) {
@@ -765,7 +871,9 @@
     }
     stars.rotation.z = t * 0.004;
     for (var pm = 0; pm < plasmaMats.length; pm++) plasmaMats[pm].uniforms.uTime.value = t;
-    if (!reduced) updateStreaks(Math.abs(gap), u * 26);
+    if (!reduced) { updateStreaks(Math.abs(gap), u * 26); updateShock(t); }
+    journeyState.speed = Math.abs(gap);
+    hoverSkill();
     if (heroName && u < 0.7) heroName.style.transform = 'perspective(900px) rotateY(' + (pmx * 5).toFixed(2) + 'deg) rotateX(' + (-pmy * 3.5).toFixed(2) + 'deg)';
     if (!reduced) updateComets(t);
     gates.children.forEach(function (ring, idx) { ring.rotation.z += (idx % 2 ? -1 : 1) * dt * 0.12; });
