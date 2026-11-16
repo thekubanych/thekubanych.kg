@@ -10,6 +10,7 @@
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="TheKubanych · Backend Developer">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b0b11'/%3E%3Cpath d='M12 20h18v6h-6v20h-6V26h-6zM34 20h6v10l9-10h8L46 32l12 14h-8L40 35v11h-6z' fill='%233b82f6'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -647,8 +648,43 @@ section { padding: 120px 0; position: relative; }
 .konami-close:hover { opacity: 0.85; }
 
 /* ── REVEAL ── */
-.reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.16,1,0.3,1); }
-.reveal.in { opacity: 1; transform: translateY(0); }
+.reveal {
+  opacity: 0; transform: perspective(1100px) translateY(38px) rotateX(12deg) scale(.965); transform-origin: 50% 100%;
+  transition: opacity 0.8s ease, transform 0.9s cubic-bezier(0.16,1,0.3,1);
+}
+.reveal.in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) { .reveal { transform: none; } }
+
+/* ── PROJECT LINK + FEATURED MOCK ── */
+.proj-link {
+  margin-top: 20px; align-self: flex-start; display: inline-flex; gap: 8px; align-items: center;
+  font-family: var(--font-mono); font-size: 12.5px; color: var(--accent);
+  border-bottom: 1px solid transparent; transition: border-color .25s, gap .25s;
+}
+.proj-link:hover { border-color: var(--accent); gap: 12px; }
+.has-journey .proj-featured .proj-visual { background: linear-gradient(135deg, rgba(59,130,246,.10), rgba(167,139,250,.06)); }
+.proj-featured .proj-visual { font-size: 13px; padding: 30px; perspective: 900px; }
+.mock {
+  width: 100%; max-width: 320px; border-radius: 14px; overflow: hidden;
+  border: 1px solid rgba(147,197,253,.28); background: rgba(8,10,18,.9); color: #dbe4ff;
+  transform: rotateY(-16deg) rotateX(7deg); transform-style: preserve-3d;
+  box-shadow: 0 30px 70px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.03) inset;
+  transition: transform .6s cubic-bezier(0.16,1,0.3,1);
+  font-family: var(--font-mono);
+}
+.proj-featured:hover .mock { transform: rotateY(-5deg) rotateX(2deg) translateZ(18px); }
+.mock-bar { display: flex; align-items: center; gap: 6px; padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,.07); }
+.mock-bar i { width: 8px; height: 8px; border-radius: 50%; background: #f87171; }
+.mock-bar i:nth-child(2) { background: #fbbf24; } .mock-bar i:nth-child(3) { background: #34d399; }
+.mock-bar span { margin-left: 8px; font-size: 10.5px; color: #8b93b0; }
+.mock-body { padding: 16px; display: grid; gap: 9px; }
+.mock-head { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; }
+.mock-head em { font-style: normal; color: #34d399; }
+.mock-row { display: flex; justify-content: space-between; font-size: 11px; color: #9aa3c2; padding: 7px 10px; border-radius: 8px; background: rgba(255,255,255,.04); }
+.mock-row span:last-child { color: #60a5fa; }
+.mock-track { height: 5px; border-radius: 5px; background: rgba(255,255,255,.08); margin-top: 6px; overflow: hidden; }
+.mock-fill { width: 72%; height: 100%; border-radius: 5px; background: linear-gradient(90deg, #3b82f6, #a78bfa); }
+.mock-foot { display: flex; justify-content: space-between; font-size: 10px; color: #8b93b0; letter-spacing: 1px; text-transform: uppercase; }
 .d1 { transition-delay: 0.05s; } .d2 { transition-delay: 0.1s; } .d3 { transition-delay: 0.15s; }
 .d4 { transition-delay: 0.2s; } .d5 { transition-delay: 0.25s; } .d6 { transition-delay: 0.3s; }
 
@@ -880,7 +916,7 @@ section { padding: 120px 0; position: relative; }
         <p class="hero-desc" data-i18n="hero_desc">Строю серверную часть веб-приложений. Python, API, базы данных — это моё. Студент SoftJol, который пишет код каждый день.</p>
         <div class="hero-stats">
           <div class="stat"><div class="stat-num">2</div><div class="stat-label" data-i18n="stat_year">SoftJol</div></div>
-          <div class="stat"><div class="stat-num">3+</div><div class="stat-label" data-i18n="stat_projects">Проекта</div></div>
+          <div class="stat"><div class="stat-num">5</div><div class="stat-label" data-i18n="stat_projects">Проекта</div></div>
           <div class="stat"><div class="stat-num">∞</div><div class="stat-label" data-i18n="stat_potential">Потенциал</div></div>
         </div>
         <div class="hero-actions">
@@ -1127,27 +1163,74 @@ section { padding: 120px 0; position: relative; }
       <div class="proj proj-featured reveal d1">
         <div class="proj-content">
           <div class="proj-num">001 · FEATURED</div>
-          <div class="proj-title" data-i18n="proj1_title">Backend API приложение</div>
-          <div class="proj-desc" data-i18n="proj1_desc">Серверная часть веб-приложения с авторизацией, БД и Swagger документацией.</div>
+          <div class="proj-title" data-i18n="p1_title">Club Portal — портал спортивного клуба</div>
+          <div class="proj-desc" data-i18n="p1_desc">Участники каждый день отмечают упражнения и получают баллы, капитаны ведут недельный план команды, тренеры и администратор видят, кто выполнил минимум. PWA на двух языках, работает в продакшне.</div>
           <div class="proj-stack">
-            <span class="pstack purple"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="">Python</span>
-            <span class="pstack purple"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/fastapi/fastapi-original.svg" alt="">FastAPI</span>
+            <span class="pstack purple"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg" alt="">Next.js</span>
+            <span class="pstack purple"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nestjs/nestjs-original.svg" alt="">NestJS</span>
+            <span class="pstack purple">Prisma</span>
             <span class="pstack green"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg" alt="">PostgreSQL</span>
-            <span class="pstack green" data-i18n="proj1_status">В процессе</span>
+            <span class="pstack green"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg" alt="">Docker</span>
+            <span class="pstack green" data-i18n="p_live">В продакшне</span>
+          </div>
+          <a class="proj-link" href="https://gym.com.kg" target="_blank" rel="noopener">gym.com.kg <span>↗</span></a>
+        </div>
+        <div class="proj-visual" aria-hidden="true">
+          <div class="mock">
+            <div class="mock-bar"><i></i><i></i><i></i><span>gym.com.kg</span></div>
+            <div class="mock-body">
+              <div class="mock-head"><b>Team · week 12</b><em>+33</em></div>
+              <div class="mock-row"><span>✓ Push-ups</span><span>+10</span></div>
+              <div class="mock-row"><span>✓ Plank</span><span>+8</span></div>
+              <div class="mock-row"><span>✓ Run 3 km</span><span>+15</span></div>
+              <div class="mock-track"><div class="mock-fill"></div></div>
+              <div class="mock-foot"><span>weekly plan</span><span>72%</span></div>
+            </div>
           </div>
         </div>
-        <div class="proj-visual">⚙️</div>
       </div>
       <div class="proj reveal d2">
         <div class="proj-num">002</div>
-        <div class="proj-title" data-i18n="proj2_title">Telegram Bot</div>
-        <div class="proj-desc" data-i18n="proj2_desc">Бот на aiogram с inline-кнопками и внешними API.</div>
+        <div class="proj-title" data-i18n="p2_title">Telegram-бот рекламы с оплатой</div>
+        <div class="proj-desc" data-i18n="p2_desc">Бот с меню на кыргызском: приём рекламы (текст, фото, видео), оплата через XPay, предпросмотр, публикация по расписанию, статистика и админ-команды.</div>
         <div class="proj-stack">
           <span class="pstack purple"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="">Python</span>
-          <span class="pstack green">aiogram</span>
-          <span class="pstack red">Telegram API</span>
+          <span class="pstack red">Telegram Bot API</span>
+          <span class="pstack green">XPay</span>
+          <span class="pstack green"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg" alt="">Docker</span>
         </div>
       </div>
+      <div class="proj reveal d3">
+        <div class="proj-num">003</div>
+        <div class="proj-title" data-i18n="p3_title">FamilyGuard — backend</div>
+        <div class="proj-desc" data-i18n="p3_desc">Семейное приложение для здоровых цифровых привычек: экранное время, расписания и запросы доступа. Командный проект — на мне Android и общий API с OpenAPI-контрактом.</div>
+        <div class="proj-stack">
+          <span class="pstack purple"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="">Python</span>
+          <span class="pstack purple"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/fastapi/fastapi-original.svg" alt="">FastAPI</span>
+          <span class="pstack purple"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/kotlin/kotlin-original.svg" alt="">Kotlin</span>
+          <span class="pstack green" data-i18n="p_wip">В разработке</span>
+        </div>
+      </div>
+      <div class="proj reveal d4">
+        <div class="proj-num">004</div>
+        <div class="proj-title" data-i18n="p4_title">Бот «Айыл жумушчулар»</div>
+        <div class="proj-desc" data-i18n="p4_desc">Telegram-сервис поиска работников по сёлам: анкеты, поиск, отдельный worker-процесс и тесты. Вырос из рекламного бота.</div>
+        <div class="proj-stack">
+          <span class="pstack purple"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="">Python</span>
+          <span class="pstack red">Telegram Bot API</span>
+          <span class="pstack green"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg" alt="">Docker</span>
+        </div>
+      </div>
+      <div class="proj reveal d5">
+        <div class="proj-num">005</div>
+        <div class="proj-title" data-i18n="p5_title">Это портфолио</div>
+        <div class="proj-desc" data-i18n="p5_desc">Django + DRF API, вход через Telegram, форма контактов с лимитом запросов и 3D-путешествие на Three.js, которое ты сейчас листаешь.</div>
+        <div class="proj-stack">
+          <span class="pstack purple"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/django/django-plain.svg" alt="">Django</span>
+          <span class="pstack purple">DRF</span>
+          <span class="pstack green"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/threejs/threejs-original.svg" alt="">Three.js</span>
+        </div>
+        <a class="proj-link" href="https://github.com/thekubanych/thekubanych.kg" target="_blank" rel="noopener">GitHub <span>↗</span></a>
       </div>
     </div>
   </div>
@@ -1274,7 +1357,7 @@ section { padding: 120px 0; position: relative; }
       </a>
     </div>
 
-    <div class="contact-footer reveal d6" data-i18n="footer">© 2025 TheKubanych · Backend Developer · SoftJol</div>
+    <div class="contact-footer reveal d6" data-i18n="footer">© 2026 TheKubanych · Backend Developer · SoftJol</div>
   </div>
 </section>
 
@@ -1289,6 +1372,12 @@ section { padding: 120px 0; position: relative; }
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js" defer></script>
 <script src="/static/js/journey.js" defer></script>
 <script>
 // ── THEME ──
@@ -1547,7 +1636,7 @@ const TRANSLATIONS = {
   ru: {
     hero_eyebrow:'BACKEND DEVELOPER · SOFTJOL',
     hero_desc:'Строю серверную часть веб-приложений. Python, API, базы данных — это моё. Студент SoftJol, который пишет код каждый день.',
-    stat_year:'SoftJol', stat_projects:'Проекта', stat_potential:'Потенциал',
+    stat_year:'SoftJol', stat_projects:'Проектов', stat_potential:'Потенциал',
     btn_contact:'Написать мне', btn_projects:'Проекты', btn_cv:'Скачать CV',
     social_find:'НАЙТИ', badge_open:'Открыт к работе',
     about_tag:'ОБО МНЕ', about_title_1:'Привет, я',
@@ -1570,16 +1659,23 @@ const TRANSLATIONS = {
     cert1_name:'Python для начинающих', cert2_name:'Базы данных и SQL', cert3_name:'Django: создание сайтов',
     cert_done:'Завершён', cert_add:'Скоро добавлю новые',
     sec_projects:'ПРОЕКТЫ', sec_projects_title:'Что я', sec_projects_em:'создал',
-    proj1_title:'Backend API приложение',
-    proj1_desc:'Серверная часть веб-приложения с авторизацией, БД и Swagger документацией.',
-    proj1_status:'В процессе',
-    proj2_title:'Telegram Bot', proj2_desc:'Бот на aiogram с inline-кнопками и внешними API.',
+    p1_title:'Club Portal — портал спортивного клуба',
+    p1_desc:'Участники каждый день отмечают упражнения и получают баллы, капитаны ведут недельный план команды, тренеры и администратор видят, кто выполнил минимум. PWA на двух языках, работает в продакшне.',
+    p2_title:'Telegram-бот рекламы с оплатой',
+    p2_desc:'Бот с меню на кыргызском: приём рекламы (текст, фото, видео), оплата через XPay, предпросмотр, публикация по расписанию, статистика и админ-команды.',
+    p3_title:'FamilyGuard — backend',
+    p3_desc:'Семейное приложение для здоровых цифровых привычек: экранное время, расписания и запросы доступа. Командный проект — на мне Android и общий API с OpenAPI-контрактом.',
+    p4_title:'Бот «Айыл жумушчулар»',
+    p4_desc:'Telegram-сервис поиска работников по сёлам: анкеты, поиск, отдельный worker-процесс и тесты. Вырос из рекламного бота.',
+    p5_title:'Это портфолио',
+    p5_desc:'Django + DRF API, вход через Telegram, форма контактов с лимитом запросов и 3D-путешествие на Three.js, которое ты сейчас листаешь.',
+    p_live:'В продакшне', p_wip:'В разработке',
     sec_exp:'ОПЫТ', sec_exp_title:'Где я', sec_exp_em:'работаю',
     sec_github:'GITHUB', sec_github_title:'Мой', sec_github_em:'профиль',
     sec_contact:'КОНТАКТЫ', contact_title1:'Давай', contact_title2:'работать', contact_title3:'вместе',
     contact_sub:'Открыт к стажировкам, проектам и просто интересному общению',
     contact_divider:'напиши напрямую',
-    footer:'© 2025 TheKubanych · Backend Developer · SoftJol',
+    footer:'© 2026 TheKubanych · Backend Developer · SoftJol',
     banner_text:'✦ Открыт к стажировкам и проектам · Готов к удалённой работе'
   },
   en: {
@@ -1608,16 +1704,23 @@ const TRANSLATIONS = {
     cert1_name:'Python for Beginners', cert2_name:'Databases & SQL', cert3_name:'Django: Building Websites',
     cert_done:'Completed', cert_add:'More coming soon',
     sec_projects:'PROJECTS', sec_projects_title:'What I', sec_projects_em:'built',
-    proj1_title:'Backend API Application',
-    proj1_desc:'Server-side web app with authentication, database integration and Swagger docs.',
-    proj1_status:'In progress',
-    proj2_title:'Telegram Bot', proj2_desc:'Bot built with aiogram featuring inline buttons and external API integrations.',
+    p1_title:'Club Portal — a sports club portal',
+    p1_desc:'Members log their exercises every day and earn points, captains run the team\'s weekly plan, coaches and the admin see who hit the minimum. A bilingual PWA, running in production.',
+    p2_title:'Paid advertising Telegram bot',
+    p2_desc:'A bot with a Kyrgyz menu: accepts ads (text, photo, video), takes XPay payments, previews, publishes on a schedule, and has statistics and admin commands.',
+    p3_title:'FamilyGuard — backend',
+    p3_desc:'A family app for healthy digital habits: screen time, schedules and access requests. A team project — I own Android and the shared API with an OpenAPI contract.',
+    p4_title:'“Aiyl Jumushchular” bot',
+    p4_desc:'A Telegram service for finding workers in villages: profiles, search, a separate worker process and tests. Grew out of the advertising bot.',
+    p5_title:'This portfolio',
+    p5_desc:'Django + DRF API, Telegram sign-in, a rate-limited contact form and the Three.js 3D journey you are scrolling through.',
+    p_live:'In production', p_wip:'In development',
     sec_exp:'EXPERIENCE', sec_exp_title:'Where I', sec_exp_em:'work',
     sec_github:'GITHUB', sec_github_title:'My', sec_github_em:'profile',
     sec_contact:'CONTACT', contact_title1:"Let's", contact_title2:'work', contact_title3:'together',
     contact_sub:'Open to internships, projects, and interesting conversations',
     contact_divider:'reach out directly',
-    footer:'© 2025 TheKubanych · Backend Developer · SoftJol',
+    footer:'© 2026 TheKubanych · Backend Developer · SoftJol',
     banner_text:'✦ Open to internships and projects · Available for remote work'
   }
 };
@@ -1701,7 +1804,7 @@ setTimeout(() => document.getElementById('pageLoader')?.classList.add('done'), 5
     help: ['Доступные команды:', 'about     — кто я', 'stack     — мой стек', 'projects  — чем занимаюсь', 'contact   — как связаться', 'clear     — очистить терминал'],
     about: ['TheKubanych — backend developer из Бишкека.', 'Строю API, базы данных и приложения на Python.'],
     stack: ['Python · Django · FastAPI · PostgreSQL · Docker · Linux · Git'],
-    projects: ['Portfolio API · Telegram bots · автоматизация · pet-проекты'],
+    projects: ['Club Portal (gym.com.kg) · Telegram-боты с оплатой', 'FamilyGuard API · это портфолио'],
     contact: ['Telegram: @themuhtarovv', 'Email: thekubanych@gmail.com'],
   };
   form.addEventListener('submit', event => {
